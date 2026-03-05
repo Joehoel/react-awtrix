@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { AwtrixApp, AwtrixText } from "../components.tsx";
+import { http } from "../protocols/http.ts";
 import { createRuntime } from "../runtime.ts";
 import { createVirtualAwtrixDevice, type VirtualAwtrixDevice } from "../test/virtual-device.ts";
 import type { Runtime } from "../types.ts";
@@ -147,7 +148,7 @@ describe("runtime HMR", () => {
       },
     };
 
-    const legacyKey = `${device.host}:${device.port}`;
+    const legacyKey = http({ host: device.host, port: device.port }).key;
     const legacyRegistry = new Map<string, unknown>();
     legacyRegistry.set(legacyKey, legacyRuntime);
     Reflect.set(globalThis, "__react_awtrix_runtime_registry__", legacyRegistry);

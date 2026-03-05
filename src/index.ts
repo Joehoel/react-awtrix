@@ -7,12 +7,16 @@ export {
   AwtrixRect,
   AwtrixText,
 } from "./components.tsx";
+export { http } from "./protocols/http.ts";
+export { mqtt } from "./protocols/mqtt.ts";
 export { createRuntime } from "./runtime.ts";
 export { notify, render } from "./renderer.ts";
 
 export type {
   AppHandle,
   AppProps,
+  AwtrixProtocol,
+  AwtrixProtocolEventMap,
   BitmapProps,
   CircleProps,
   Color,

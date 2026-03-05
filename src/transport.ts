@@ -1,5 +1,4 @@
-import { deleteApp, pushApp } from "./client.ts";
-import type { AwtrixPayload } from "./types.ts";
+import type { AwtrixPayload, AwtrixProtocol } from "./types.ts";
 
 interface PendingWaiter {
   resolve: () => void;
@@ -22,35 +21,18 @@ interface PendingEntry {
   waiters: PendingWaiter[];
 }
 
-export interface TransportClient {
-  pushApp: (
-    host: string,
-    port: number,
-    name: string,
-    payload: AwtrixPayload,
-  ) => Promise<void>;
-  deleteApp: (host: string, port: number, name: string) => Promise<void>;
-}
+export type TransportClient = Pick<AwtrixProtocol, "pushApp" | "deleteApp">;
 
 export interface DeviceTransportOptions {
-  host: string;
-  port: number;
+  client: TransportClient;
   minIntervalMs?: number;
-  client?: TransportClient;
 }
 
 function createDisposedError(): Error {
   return new Error("[react-awtrix] DeviceTransport is disposed.");
 }
 
-const defaultTransportClient: TransportClient = {
-  pushApp,
-  deleteApp,
-};
-
 export class DeviceTransport {
-  private readonly host: string;
-  private readonly port: number;
   private readonly minIntervalMs: number;
   private readonly client: TransportClient;
 
@@ -61,9 +43,7 @@ export class DeviceTransport {
   private lastSendAt: number | undefined;
 
   constructor(options: DeviceTransportOptions) {
-    this.host = options.host;
-    this.port = options.port;
-    this.client = options.client ?? defaultTransportClient;
+    this.client = options.client;
     this.minIntervalMs = options.minIntervalMs ?? 0;
   }
 
@@ -147,9 +127,9 @@ export class DeviceTransport {
         await this.waitForMinInterval();
 
         if (entry.operation.kind === "push") {
-          await this.client.pushApp(this.host, this.port, appName, entry.operation.payload);
+          await this.client.pushApp(appName, entry.operation.payload);
         } else {
-          await this.client.deleteApp(this.host, this.port, appName);
+          await this.client.deleteApp(appName);
         }
 
         this.lastSendAt = Date.now();

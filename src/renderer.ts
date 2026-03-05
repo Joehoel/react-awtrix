@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ConcurrentRoot } from "react-reconciler/constants.js";
-import { deleteApp, pushApp, pushNotify } from "./client.ts";
+import { resolveProtocol } from "./protocols/resolve.ts";
 import { reconciler } from "./reconciler.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import type {
@@ -55,16 +55,13 @@ function createOperationQueue(): (operation: () => Promise<void>) => Promise<voi
  * ```
  */
 export function render(element: ReactNode, options: RenderOptions): RenderHandle {
-  const host = options.host;
-  const port = options.port ?? 80;
+  const protocol = resolveProtocol(options);
   const appName = options.app;
   const enqueueOperation = createOperationQueue();
   let disposed = false;
   let deletePromise: Promise<void> | undefined;
 
   const container: AwtrixAppContainer = {
-    host,
-    port,
     appName,
     mode: "app",
     matrixWidth: options.width ?? DEFAULT_MATRIX_WIDTH,
@@ -82,7 +79,7 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
           return;
         }
 
-        await pushApp(host, port, appName, payload);
+        await protocol.pushApp(appName, payload);
       });
     },
     requestDelete: () => {
@@ -92,7 +89,7 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
 
       disposed = true;
       deletePromise = enqueueOperation(async () => {
-        await deleteApp(host, port, appName);
+        await protocol.deleteApp(appName);
       });
 
       return deletePromise;
@@ -153,8 +150,7 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
  * ```
  */
 export function notify(element: ReactNode, options: NotifyOptions): Promise<void> {
-  const host = options.host;
-  const port = options.port ?? 80;
+  const protocol = resolveProtocol(options);
 
   const notifyPayloadOptions: NotifyPayloadOptions = {
     hold: options.hold,
@@ -165,8 +161,6 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
 
   return new Promise((resolve, reject) => {
     const container: AwtrixNotifyContainer = {
-      host,
-      port,
       appName: "__notify",
       mode: "notify",
       notifyOptions: notifyPayloadOptions,
@@ -180,7 +174,7 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
         reject(error);
       },
       requestFlush: async (payload) => {
-        await pushNotify(host, port, payload);
+        await protocol.pushNotify(payload);
       },
     };
 

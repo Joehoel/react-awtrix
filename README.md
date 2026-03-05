@@ -24,6 +24,60 @@ render(
 
 The public API is component-based (`AwtrixApp`, `AwtrixPixel`, `AwtrixLine`, `AwtrixRect`, `AwtrixCircle`, `AwtrixText`, `AwtrixBitmap`).
 
+`host`/`port` options are shorthand for HTTP transport.
+
+## Protocols
+
+You can pass an explicit protocol instead of `host`/`port`.
+
+### HTTP
+
+```tsx
+import { AwtrixApp, AwtrixText, http, render } from "react-awtrix";
+
+render(
+  <AwtrixApp>
+    <AwtrixText x={0} y={7} color="#FFFFFF">Hello</AwtrixText>
+  </AwtrixApp>,
+  {
+    app: "http-demo",
+    protocol: http({ host: "192.168.1.45", port: 80 }),
+  },
+);
+```
+
+### MQTT
+
+```tsx
+import { AwtrixApp, AwtrixText, createRuntime, mqtt } from "react-awtrix";
+
+const runtime = createRuntime({
+  protocol: mqtt({
+    broker: "mqtt://192.168.1.20",
+    prefix: "awtrix_abcd",
+  }),
+});
+
+runtime.app(
+  "mqtt-demo",
+  <AwtrixApp>
+    <AwtrixText x={0} y={7} color="#FFFFFF">MQTT</AwtrixText>
+  </AwtrixApp>,
+);
+```
+
+## Runtime events
+
+`createRuntime()` supports protocol-backed subscriptions:
+
+```tsx
+runtime.on("button:left", (event) => {
+  console.log(event.pressed, event.raw);
+});
+```
+
+HTTP does not provide subscription events. Calling `runtime.on(...)` with an HTTP protocol throws a descriptive error.
+
 ## Examples
 
 ```bash
@@ -32,4 +86,6 @@ bun run example:clock
 bun run example:progress
 bun run example:complex
 bun run example:pomodoro
+bun run example:mqtt
+bun run example:server
 ```

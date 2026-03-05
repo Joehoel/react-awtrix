@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ConcurrentRoot } from "react-reconciler/constants.js";
+import { resolveProtocol } from "./protocols/resolve.ts";
 import { reconciler } from "./reconciler.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import { DeviceTransport } from "./transport.ts";
@@ -7,6 +8,8 @@ import type {
   AppHandle,
   AwtrixAppContainer,
   AwtrixContainer,
+  AwtrixProtocol,
+  AwtrixProtocolEventMap,
   Runtime,
   RuntimeOptions,
 } from "./types.ts";
@@ -33,15 +36,18 @@ function runtimeRegistry(): Map<string, AwtrixRuntimeImpl> {
   return globalThis.__react_awtrix_runtime_registry__;
 }
 
-function runtimeKey(host: string, port: number): string {
-  return `${host}:${port}`;
+function runtimeKey(protocol: AwtrixProtocol): string {
+  return protocol.key;
 }
 
 class AwtrixRuntimeImpl implements Runtime {
-  private readonly host: string;
-  private readonly port: number;
+  private readonly protocol: AwtrixProtocol;
   private readonly transport: DeviceTransport;
   private readonly entries = new Map<string, RuntimeAppEntry>();
+  private readonly protocolSubscriptions = new Map<
+    keyof AwtrixProtocolEventMap,
+    Map<unknown, () => void>
+  >();
   private readonly registry: Map<string, AwtrixRuntimeImpl>;
   private readonly registryKey: string;
   private readonly owner: symbol;
@@ -60,15 +66,19 @@ class AwtrixRuntimeImpl implements Runtime {
   private hmrEnabled = false;
   private onError: ((appName: string, error: unknown) => void) | undefined;
 
-  constructor(options: RuntimeOptions, registry: Map<string, AwtrixRuntimeImpl>, key: string, owner: symbol) {
-    this.host = options.host;
-    this.port = options.port ?? 80;
+  constructor(
+    options: RuntimeOptions,
+    protocol: AwtrixProtocol,
+    registry: Map<string, AwtrixRuntimeImpl>,
+    key: string,
+    owner: symbol,
+  ) {
+    this.protocol = protocol;
     this.registry = registry;
     this.registryKey = key;
     this.owner = owner;
     this.transport = new DeviceTransport({
-      host: this.host,
-      port: this.port,
+      client: protocol,
       minIntervalMs: 0,
     });
 
@@ -226,7 +236,17 @@ class AwtrixRuntimeImpl implements Runtime {
       }
     }
 
+    this.clearProtocolSubscriptions();
     this.transport.dispose();
+
+    if (this.protocol.dispose !== undefined) {
+      try {
+        await this.protocol.dispose();
+      } catch (error) {
+        console.error("[react-awtrix] Runtime protocol disposal failed:", error);
+      }
+    }
+
     this.hmrSeenApps = undefined;
 
     const currentRegistryEntry = this.registry.get(this.registryKey);
@@ -256,7 +276,15 @@ class AwtrixRuntimeImpl implements Runtime {
       }
     }
 
+    this.clearProtocolSubscriptions();
     this.transport.dispose();
+
+    if (this.protocol.dispose !== undefined) {
+      void this.protocol.dispose().catch((error: unknown) => {
+        console.error("[react-awtrix] Runtime protocol disposal failed during hot handoff:", error);
+      });
+    }
+
     this.hmrSeenApps = undefined;
     this.hmrCarryoverApps = undefined;
 
@@ -270,6 +298,58 @@ class AwtrixRuntimeImpl implements Runtime {
 
   apps(): string[] {
     return [...this.entries.keys()];
+  }
+
+  on<K extends keyof AwtrixProtocolEventMap>(
+    event: K,
+    handler: (payload: AwtrixProtocolEventMap[K]) => void,
+  ): void {
+    if (this.disposed) {
+      throw new Error("[react-awtrix] Cannot subscribe on a disposed runtime.");
+    }
+
+    if (this.protocol.on === undefined) {
+      throw new Error(
+        `[react-awtrix] Protocol "${this.protocol.kind}" does not support subscriptions.`,
+      );
+    }
+
+    const unsubscribe = this.protocol.on(event, handler);
+    let listeners = this.protocolSubscriptions.get(event);
+
+    if (listeners === undefined) {
+      listeners = new Map();
+      this.protocolSubscriptions.set(event, listeners);
+    }
+
+    const existing = listeners.get(handler);
+    if (existing !== undefined) {
+      existing();
+    }
+
+    listeners.set(handler, unsubscribe);
+  }
+
+  off<K extends keyof AwtrixProtocolEventMap>(
+    event: K,
+    handler: (payload: AwtrixProtocolEventMap[K]) => void,
+  ): void {
+    const listeners = this.protocolSubscriptions.get(event);
+    if (listeners === undefined) {
+      return;
+    }
+
+    const unsubscribe = listeners.get(handler);
+    if (unsubscribe === undefined) {
+      return;
+    }
+
+    listeners.delete(handler);
+    unsubscribe();
+
+    if (listeners.size === 0) {
+      this.protocolSubscriptions.delete(event);
+    }
   }
 
   handleSignals(): void {
@@ -292,8 +372,6 @@ class AwtrixRuntimeImpl implements Runtime {
 
   private createContainer(name: string): AwtrixAppContainer {
     return {
-      host: this.host,
-      port: this.port,
       appName: name,
       mode: "app",
       matrixWidth: this.matrixWidth,
@@ -384,6 +462,16 @@ class AwtrixRuntimeImpl implements Runtime {
     this.signalsRegistered = false;
   }
 
+  private clearProtocolSubscriptions(): void {
+    for (const listeners of this.protocolSubscriptions.values()) {
+      for (const unsubscribe of listeners.values()) {
+        unsubscribe();
+      }
+    }
+
+    this.protocolSubscriptions.clear();
+  }
+
   private async pruneStaleApps(names: string[]): Promise<void> {
     for (const name of names) {
       try {
@@ -408,9 +496,8 @@ class AwtrixRuntimeImpl implements Runtime {
 }
 
 export function createRuntime(options: RuntimeOptions): Runtime {
-  const host = options.host;
-  const port = options.port ?? 80;
-  const key = runtimeKey(host, port);
+  const protocol = resolveProtocol(options);
+  const key = runtimeKey(protocol);
   const registry = runtimeRegistry();
 
   const existingRuntime = registry.get(key);
@@ -435,7 +522,7 @@ export function createRuntime(options: RuntimeOptions): Runtime {
         }
       }
 
-      const nextRuntime = new AwtrixRuntimeImpl(options, registry, key, moduleRuntimeOwner);
+      const nextRuntime = new AwtrixRuntimeImpl(options, protocol, registry, key, moduleRuntimeOwner);
       registry.set(key, nextRuntime);
 
       if (options.hmr === true) {
@@ -449,7 +536,7 @@ export function createRuntime(options: RuntimeOptions): Runtime {
 
     if (!existingRuntime.owns(moduleRuntimeOwner)) {
       const carryoverApps = existingRuntime.hotHandoff();
-      const nextRuntime = new AwtrixRuntimeImpl(options, registry, key, moduleRuntimeOwner);
+      const nextRuntime = new AwtrixRuntimeImpl(options, protocol, registry, key, moduleRuntimeOwner);
       registry.set(key, nextRuntime);
 
       if (hmrEnabled) {
@@ -469,7 +556,7 @@ export function createRuntime(options: RuntimeOptions): Runtime {
     return existingRuntime;
   }
 
-  const runtime = new AwtrixRuntimeImpl(options, registry, key, moduleRuntimeOwner);
+  const runtime = new AwtrixRuntimeImpl(options, protocol, registry, key, moduleRuntimeOwner);
   registry.set(key, runtime);
   return runtime;
 }

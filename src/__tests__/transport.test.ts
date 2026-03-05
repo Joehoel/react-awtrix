@@ -35,18 +35,16 @@ describe("DeviceTransport", () => {
     const calls: Array<{ name: string; payload: AwtrixPayload }> = [];
 
     const client: TransportClient = {
-      pushApp(_host, _port, name, payload) {
+      pushApp(name, payload) {
         calls.push({ name, payload });
         return Promise.resolve();
       },
-      deleteApp() {
+      deleteApp(_name) {
         return Promise.resolve();
       },
     };
 
     const transport = new DeviceTransport({
-      host: "127.0.0.1",
-      port: 80,
       client,
       minIntervalMs: 0,
     });
@@ -71,14 +69,12 @@ describe("DeviceTransport", () => {
         await Bun.sleep(20);
         inFlight -= 1;
       },
-      deleteApp() {
+      deleteApp(_name) {
         return Promise.resolve();
       },
     };
 
     const transport = new DeviceTransport({
-      host: "127.0.0.1",
-      port: 80,
       client,
       minIntervalMs: 0,
     });
@@ -100,15 +96,13 @@ describe("DeviceTransport", () => {
         timestamps.push(Date.now());
         return Promise.resolve();
       },
-      deleteApp() {
+      deleteApp(_name) {
         return Promise.resolve();
       },
     };
 
     const minIntervalMs = 35;
     const transport = new DeviceTransport({
-      host: "127.0.0.1",
-      port: 80,
       client,
       minIntervalMs,
     });
@@ -134,18 +128,16 @@ describe("DeviceTransport", () => {
     const firstSendGate = createDeferred();
 
     const client: TransportClient = {
-      async pushApp(_host, _port, name) {
+      async pushApp(name, _payload) {
         calls.push(`push:${name}`);
         await firstSendGate.promise;
       },
-      async deleteApp(_host, _port, name) {
+      async deleteApp(name) {
         calls.push(`delete:${name}`);
       },
     };
 
     const transport = new DeviceTransport({
-      host: "127.0.0.1",
-      port: 80,
       client,
       minIntervalMs: 0,
     });
@@ -165,20 +157,18 @@ describe("DeviceTransport", () => {
     const calls: string[] = [];
 
     const client: TransportClient = {
-      async pushApp(_host, _port, name) {
+      async pushApp(name, _payload) {
         calls.push(name);
         if (name === "bad") {
           throw new Error("boom");
         }
       },
-      deleteApp() {
+      deleteApp(_name) {
         return Promise.resolve();
       },
     };
 
     const transport = new DeviceTransport({
-      host: "127.0.0.1",
-      port: 80,
       client,
       minIntervalMs: 0,
     });

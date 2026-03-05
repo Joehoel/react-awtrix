@@ -20,8 +20,6 @@ function createContainer(mode?: "app" | "notify"): AwtrixContainer;
 function createContainer(mode: "app" | "notify" = "app"): AwtrixContainer {
   if (mode === "notify") {
     const notifyContainer: AwtrixNotifyContainer = {
-      host: "127.0.0.1",
-      port: 80,
       appName: "serialize-test",
       mode: "notify",
       matrixWidth: 32,
@@ -36,8 +34,6 @@ function createContainer(mode: "app" | "notify" = "app"): AwtrixContainer {
   }
 
   const appContainer: AwtrixAppContainer = {
-    host: "127.0.0.1",
-    port: 80,
     appName: "serialize-test",
     mode: "app",
     matrixWidth: 32,

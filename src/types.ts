@@ -174,19 +174,28 @@ export interface AwtrixTextInstance {
 
 export type AwtrixNode = AwtrixInstance | AwtrixTextInstance;
 
-export interface RenderOptions {
+interface HostConnectionOptions {
   host: string;
-  app: string;
   port?: number;
+}
+
+interface ProtocolConnectionOptions {
+  protocol: AwtrixProtocol;
+  host?: never;
+  port?: never;
+}
+
+type ConnectionOptions = HostConnectionOptions | ProtocolConnectionOptions;
+
+export type RenderOptions = ConnectionOptions & {
+  app: string;
   debug?: boolean;
   debounce?: number;
   width?: number;
   height?: number;
-}
+};
 
-export interface NotifyOptions {
-  host: string;
-  port?: number;
+export type NotifyOptions = ConnectionOptions & {
   hold?: boolean;
   sound?: string;
   stack?: boolean;
@@ -194,7 +203,7 @@ export interface NotifyOptions {
   debug?: boolean;
   width?: number;
   height?: number;
-}
+};
 
 export interface NotifyPayloadOptions {
   hold?: boolean;
@@ -211,22 +220,28 @@ export interface AppHandle extends RenderHandle {
   update(element: ReactNode): void;
 }
 
-export interface RuntimeOptions {
-  host: string;
-  port?: number;
+export type RuntimeOptions = ConnectionOptions & {
   debug?: boolean;
   debounce?: number;
   width?: number;
   height?: number;
   hmr?: boolean;
   onError?: (appName: string, error: unknown) => void;
-}
+};
 
 export interface Runtime {
   app(name: string, element: ReactNode): AppHandle;
   remove(name: string): Promise<void>;
   dispose(): Promise<void>;
   apps(): string[];
+  on<K extends keyof AwtrixProtocolEventMap>(
+    event: K,
+    handler: (payload: AwtrixProtocolEventMap[K]) => void,
+  ): void;
+  off<K extends keyof AwtrixProtocolEventMap>(
+    event: K,
+    handler: (payload: AwtrixProtocolEventMap[K]) => void,
+  ): void;
   handleSignals(): void;
 }
 
@@ -239,9 +254,31 @@ export interface AppPayload extends Omit<AppProps, "background" | "progressC" | 
 
 export type AwtrixPayload = AppPayload & NotifyPayloadOptions;
 
+export interface AwtrixProtocolEventMap {
+  "button:left": { pressed: boolean; raw: string };
+  "button:select": { pressed: boolean; raw: string };
+  "button:right": { pressed: boolean; raw: string };
+  currentApp: { name: string };
+  stats: { value: Record<string, unknown> };
+  device: { online: boolean };
+}
+
+export interface AwtrixProtocol {
+  readonly kind: "http" | "mqtt" | (string & {});
+  readonly key: string;
+  pushApp(name: string, payload: AwtrixPayload): Promise<void>;
+  deleteApp(name: string): Promise<void>;
+  pushNotify(payload: AwtrixPayload): Promise<void>;
+  dismissNotify?(): Promise<void>;
+  connect?(): Promise<void>;
+  dispose?(): Promise<void>;
+  on?<K extends keyof AwtrixProtocolEventMap>(
+    event: K,
+    handler: (payload: AwtrixProtocolEventMap[K]) => void,
+  ): () => void;
+}
+
 interface AwtrixContainerBase {
-  host: string;
-  port: number;
   appName: string;
   matrixWidth: number;
   matrixHeight: number;
