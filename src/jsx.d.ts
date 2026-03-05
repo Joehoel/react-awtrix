@@ -9,49 +9,33 @@ import type {
   TextProps,
 } from "./types.ts";
 
-interface TextElementProps extends TextProps {
+interface AwtrixTextElementProps extends TextProps {
   children?: string | number | Array<string | number>;
 }
 
-interface AppElementProps extends AppProps {
+interface AwtrixAppElementProps extends AppProps {
   children?: ReactNode;
 }
 
 interface AwtrixIntrinsicElements {
-  app: AppElementProps;
-  pixel: PixelProps;
+  "awtrix-app": AwtrixAppElementProps;
+  "awtrix-pixel": PixelProps;
   "awtrix-line": LineProps;
   "awtrix-rect": RectProps;
   "awtrix-circle": CircleProps;
-  "awtrix-text": TextElementProps;
+  "awtrix-text": AwtrixTextElementProps;
   "awtrix-bitmap": BitmapProps;
 }
 
 declare module "react" {
   namespace JSX {
-    interface IntrinsicElements extends AwtrixIntrinsicElements {
-      app: AppElementProps;
-      pixel: PixelProps;
-      "awtrix-line": LineProps;
-      "awtrix-rect": RectProps;
-      "awtrix-circle": CircleProps;
-      "awtrix-text": TextElementProps;
-      "awtrix-bitmap": BitmapProps;
-    }
+    interface IntrinsicElements extends AwtrixIntrinsicElements {}
   }
 }
 
 declare module "react/jsx-runtime" {
   namespace JSX {
-    interface IntrinsicElements extends AwtrixIntrinsicElements {
-      app: AppElementProps;
-      pixel: PixelProps;
-      "awtrix-line": LineProps;
-      "awtrix-rect": RectProps;
-      "awtrix-circle": CircleProps;
-      "awtrix-text": TextElementProps;
-      "awtrix-bitmap": BitmapProps;
-    }
+    interface IntrinsicElements extends AwtrixIntrinsicElements {}
   }
 }
 

@@ -1,4 +1,4 @@
-import { render } from "../index.ts";
+import { AwtrixApp, AwtrixRect, AwtrixText, render } from "../index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
@@ -6,14 +6,12 @@ if (host === undefined) {
 }
 
 render(
-  <app icon="87" duration={20} background="#001126" center>
-    <awtrix-rect x={0} y={0} width={32} height={8} color="#001126" filled />
-    <awtrix-text x={6} y={1} color="#FFFFFF">
-      Hello JSX
-    </awtrix-text>
-    <pixel x={29} y={1} color="#FF9D00" />
-    <pixel x={30} y={2} color="#FF9D00" />
-  </app>,
+  <AwtrixApp icon="87" duration={20} background="#001126" center>
+    <AwtrixRect x={0} y={0} width={32} height={8} color="#001126" filled />
+    <AwtrixText x={1} y={1} color="#FFFFFF" maxWidth={30}>
+      Hello
+    </AwtrixText>
+  </AwtrixApp>,
   {
     host,
     app: "jsx_hello",

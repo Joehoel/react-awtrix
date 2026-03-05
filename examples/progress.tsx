@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { render } from "../index.ts";
+import { AwtrixApp, AwtrixRect, AwtrixText, render } from "../index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
@@ -20,7 +20,7 @@ function ProgressApp() {
   }, []);
 
   return (
-    <app
+    <AwtrixApp
       icon="1736"
       duration={8}
       background="#040A10"
@@ -28,11 +28,11 @@ function ProgressApp() {
       progressC="#2ECC71"
       progressBC="#1A1F26"
     >
-      <awtrix-rect x={0} y={0} width={32} height={8} color="#040A10" filled />
-      <awtrix-text x={2} y={1} color="#FFFFFF">
+      <AwtrixRect x={0} y={0} width={32} height={8} color="#040A10" filled />
+      <AwtrixText x={2} y={1} color="#FFFFFF">
         {value}%
-      </awtrix-text>
-    </app>
+      </AwtrixText>
+    </AwtrixApp>
   );
 }
 

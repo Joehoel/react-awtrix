@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { render } from "../index.ts";
+import { AwtrixApp, AwtrixRect, AwtrixText, render } from "../index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
-  throw new Error("Missing AWTRIX_HOST. Example: AWTRIX_HOST=192.168.1.45 bun run examples/clock.tsx");
+  throw new Error(
+    "Missing AWTRIX_HOST. Example: AWTRIX_HOST=192.168.1.45 bun run examples/clock.tsx",
+  );
 }
 
 function formatClock(date: Date): string {
@@ -27,12 +29,12 @@ function ClockApp() {
   }, []);
 
   return (
-    <app icon="66" duration={10} background="#000814" center>
-      <awtrix-rect x={0} y={0} width={32} height={8} color="#000814" filled />
-      <awtrix-text x={1} y={1} color="#7FDBFF">
+    <AwtrixApp icon="66" duration={10} background="#000814" center>
+      <AwtrixRect x={0} y={0} width={32} height={8} color="#000814" filled />
+      <AwtrixText x={0} y={1} color="#7FDBFF">
         {formatClock(time)}
-      </awtrix-text>
-    </app>
+      </AwtrixText>
+    </AwtrixApp>
   );
 }
 

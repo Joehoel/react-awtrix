@@ -33,6 +33,8 @@ export async function deleteApp(
 ): Promise<void> {
   const res = await fetch(url(host, port, `/api/custom?name=${name}`), {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
   });
 
   if (!res.ok) {

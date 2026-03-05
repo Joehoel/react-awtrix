@@ -84,7 +84,9 @@ function scheduleFlush(container: AwtrixContainer): void {
     }
 
     try {
-      if (container.mode === "notify") {
+      if (container.requestFlush !== undefined) {
+        await container.requestFlush(payload);
+      } else if (container.mode === "notify") {
         await pushNotify(container.host, container.port, payload);
       } else {
         await pushApp(container.host, container.port, container.appName, payload);
@@ -196,7 +198,7 @@ const hostConfig: ReactReconciler.HostConfig<
   /* HydratableInst  */ never,
   /* FormInstance    */ never,
   /* PublicInstance  */ AwtrixNode,
-  /* HostContext     */ null,
+  /* HostContext     */ Record<string, never>,
   /* ChildSet         */ never,
   /* TimeoutHandle   */ ReturnType<typeof setTimeout>,
   /* NoTimeout       */ -1,
@@ -216,7 +218,7 @@ const hostConfig: ReactReconciler.HostConfig<
     if (elementType === undefined) {
       throw new Error(
         `[react-awtrix] Unknown element <${type}>. ` +
-        `Valid elements: app, pixel, awtrix-line, awtrix-rect, awtrix-circle, awtrix-text, awtrix-bitmap`,
+        `Valid elements: awtrix-app, awtrix-pixel, awtrix-line, awtrix-rect, awtrix-circle, awtrix-text, awtrix-bitmap`,
       );
     }
 
@@ -244,11 +246,11 @@ const hostConfig: ReactReconciler.HostConfig<
   },
 
   getRootHostContext() {
-    return null;
+    return {};
   },
 
-  getChildHostContext() {
-    return null;
+  getChildHostContext(parentContext) {
+    return parentContext;
   },
 
   getPublicInstance(instance) {

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ConcurrentRoot } from "react-reconciler/constants.js";
 import { reconciler } from "./reconciler.ts";
 import { deleteApp } from "./client.ts";
+import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import type {
   AwtrixContainer,
   NotifyOptions,
@@ -20,13 +21,13 @@ import type {
  *
  * @example
  * ```tsx
- * import { render } from 'react-awtrix';
+ * import { AwtrixApp, AwtrixText, render } from 'react-awtrix';
  *
  * function App() {
  *   return (
- *     <app icon="1234" duration={10}>
- *       <awtrix-text x={1} y={1} color="#FFFFFF">Hello!</awtrix-text>
- *     </app>
+ *     <AwtrixApp icon="1234" duration={10}>
+ *       <AwtrixText x={1} y={1} color="#FFFFFF">Hello!</AwtrixText>
+ *     </AwtrixApp>
  *   );
  * }
  *
@@ -44,6 +45,8 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
     port: options.port ?? 80,
     appName: options.app,
     mode: "app",
+    matrixWidth: options.width ?? DEFAULT_MATRIX_WIDTH,
+    matrixHeight: options.height ?? DEFAULT_MATRIX_HEIGHT,
     children: [],
     debug: options.debug ?? false,
     debounceMs: options.debounce ?? 50,
@@ -94,10 +97,10 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
  *
  * @example
  * ```tsx
- * import { notify } from 'react-awtrix';
+ * import { AwtrixText, notify } from 'react-awtrix';
  *
  * await notify(
- *   <awtrix-text x={0} y={0} color="#FF0000">Alert!</awtrix-text>,
+ *   <AwtrixText x={0} y={0} color="#FF0000">Alert!</AwtrixText>,
  *   { host: '192.168.1.100', hold: true }
  * );
  * ```
@@ -117,6 +120,8 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
       appName: "__notify",
       mode: "notify",
       notifyOptions: notifyPayloadOptions,
+      matrixWidth: options.width ?? DEFAULT_MATRIX_WIDTH,
+      matrixHeight: options.height ?? DEFAULT_MATRIX_HEIGHT,
       children: [],
       debug: options.debug ?? false,
       debounceMs: 0, // notifications flush immediately

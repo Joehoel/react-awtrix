@@ -1,4 +1,10 @@
+import type { ReactNode } from "react";
+
 export type Color = string | [number, number, number];
+
+export const DEFAULT_MATRIX_WIDTH = 32;
+export const DEFAULT_MATRIX_HEIGHT = 8;
+export const DEFAULT_TEXT_CHAR_WIDTH = 4;
 
 export type Overlay = "clear" | "snow" | "rain" | "drizzle" | "storm" | "thunder" | "frost";
 export type TextCase = 0 | 1 | 2;
@@ -46,6 +52,8 @@ export interface TextProps {
   x: number;
   y: number;
   color: Color;
+  maxWidth?: number;
+  charWidth?: number;
 }
 
 export interface BitmapProps {
@@ -86,13 +94,8 @@ export interface AppProps {
 export type ElementType = "pixel" | "line" | "rect" | "circle" | "text" | "bitmap" | "app";
 
 const hostElementTypeMap: Record<string, ElementType> = {
-  pixel: "pixel",
-  line: "line",
-  rect: "rect",
-  circle: "circle",
-  text: "text",
-  bitmap: "bitmap",
-  app: "app",
+  "awtrix-app": "app",
+  "awtrix-pixel": "pixel",
   "awtrix-line": "line",
   "awtrix-rect": "rect",
   "awtrix-circle": "circle",
@@ -177,6 +180,8 @@ export interface RenderOptions {
   port?: number;
   debug?: boolean;
   debounce?: number;
+  width?: number;
+  height?: number;
 }
 
 export interface NotifyOptions {
@@ -187,6 +192,8 @@ export interface NotifyOptions {
   stack?: boolean;
   wakeup?: boolean;
   debug?: boolean;
+  width?: number;
+  height?: number;
 }
 
 export interface NotifyPayloadOptions {
@@ -198,6 +205,29 @@ export interface NotifyPayloadOptions {
 
 export interface RenderHandle {
   unmount(): Promise<void>;
+}
+
+export interface AppHandle extends RenderHandle {
+  update(element: ReactNode): void;
+}
+
+export interface RuntimeOptions {
+  host: string;
+  port?: number;
+  debug?: boolean;
+  debounce?: number;
+  width?: number;
+  height?: number;
+  hmr?: boolean;
+  onError?: (appName: string, error: unknown) => void;
+}
+
+export interface Runtime {
+  app(name: string, element: ReactNode): AppHandle;
+  remove(name: string): Promise<void>;
+  dispose(): Promise<void>;
+  apps(): string[];
+  handleSignals(): void;
 }
 
 export interface AppPayload extends Omit<AppProps, "background" | "progressC" | "progressBC"> {
@@ -215,12 +245,15 @@ export interface AwtrixContainer {
   appName: string;
   mode: "app" | "notify";
   notifyOptions?: NotifyPayloadOptions;
+  matrixWidth: number;
+  matrixHeight: number;
   children: AwtrixNode[];
   debug: boolean;
   debounceMs: number;
   pendingFlush?: ReturnType<typeof setTimeout>;
   onFlush?: () => void;
   onFlushError?: (error: unknown) => void;
+  requestFlush?: (payload: AwtrixPayload) => Promise<void>;
 }
 
 function toHexByte(value: number): string {

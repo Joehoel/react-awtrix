@@ -11,18 +11,18 @@ bun install
 ## Basic usage
 
 ```tsx
-import { render } from "react-awtrix";
+import { AwtrixApp, AwtrixRect, AwtrixText, render } from "react-awtrix";
 
 render(
-  <app icon="87" duration={15}>
-    <awtrix-rect x={0} y={0} width={32} height={8} color="#000011" filled />
-    <awtrix-text x={1} y={1} color="#FFFFFF">Hello JSX</awtrix-text>
-  </app>,
+  <AwtrixApp icon="87" duration={15}>
+    <AwtrixRect x={0} y={0} width={32} height={8} color="#000011" filled />
+    <AwtrixText x={1} y={1} color="#FFFFFF" maxWidth={30}>Hello JSX</AwtrixText>
+  </AwtrixApp>,
   { host: "192.168.1.45", app: "jsx_demo" },
 );
 ```
 
-Supported JSX elements: `app`, `pixel`, `awtrix-line`, `awtrix-rect`, `awtrix-circle`, `awtrix-text`, `awtrix-bitmap`.
+The public API is component-based (`AwtrixApp`, `AwtrixPixel`, `AwtrixLine`, `AwtrixRect`, `AwtrixCircle`, `AwtrixText`, `AwtrixBitmap`).
 
 ## Examples
 
@@ -30,4 +30,6 @@ Supported JSX elements: `app`, `pixel`, `awtrix-line`, `awtrix-rect`, `awtrix-ci
 bun run example:hello
 bun run example:clock
 bun run example:progress
+bun run example:complex
+bun run example:pomodoro
 ```

@@ -10,10 +10,14 @@
     "./jsx-dev-runtime": "./jsx-dev-runtime.ts"
   },
   "scripts": {
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "example:hello": "bun run examples/hello.tsx",
     "example:clock": "bun run examples/clock.tsx",
-    "example:progress": "bun run examples/progress.tsx"
+    "example:progress": "bun run examples/progress.tsx",
+    "example:complex": "bun run examples/complex.tsx",
+    "example:pomodoro": "bun run examples/pomodoro.tsx",
+    "example:server": "bun --hot examples/server.tsx"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -25,6 +29,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "arktype": "^2.2.0",
     "react": "^19.2.4",
     "react-reconciler": "^0.33.0"
   }
