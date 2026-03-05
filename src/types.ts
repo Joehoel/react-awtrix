@@ -1,0 +1,241 @@
+export type Color = string | [number, number, number];
+
+export type Overlay = "clear" | "snow" | "rain" | "drizzle" | "storm" | "thunder" | "frost";
+export type TextCase = 0 | 1 | 2;
+export type LifetimeMode = 0 | 1;
+export type PushIcon = 0 | 1 | 2;
+
+export interface EffectSettings {
+  speed?: number;
+  palette?: string;
+  blend?: boolean;
+}
+
+export interface PixelProps {
+  x: number;
+  y: number;
+  color: Color;
+}
+
+export interface LineProps {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  color: Color;
+}
+
+export interface RectProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: Color;
+  filled?: boolean;
+}
+
+export interface CircleProps {
+  x: number;
+  y: number;
+  radius: number;
+  color: Color;
+  filled?: boolean;
+}
+
+export interface TextProps {
+  x: number;
+  y: number;
+  color: Color;
+}
+
+export interface BitmapProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  data: number[];
+}
+
+export interface AppProps {
+  icon?: string;
+  duration?: number;
+  lifetime?: number;
+  lifetimeMode?: LifetimeMode;
+  text?: string;
+  textCase?: TextCase;
+  topText?: boolean;
+  textOffset?: number;
+  center?: boolean;
+  noScroll?: boolean;
+  scrollSpeed?: number;
+  background?: Color;
+  effect?: string;
+  effectSettings?: EffectSettings;
+  overlay?: Overlay;
+  progress?: number;
+  progressC?: Color;
+  progressBC?: Color;
+  bar?: number[];
+  line?: number[];
+  rainbow?: boolean;
+  pushIcon?: PushIcon;
+  repeat?: number;
+  save?: boolean;
+}
+
+export type ElementType = "pixel" | "line" | "rect" | "circle" | "text" | "bitmap" | "app";
+
+const hostElementTypeMap: Record<string, ElementType> = {
+  pixel: "pixel",
+  line: "line",
+  rect: "rect",
+  circle: "circle",
+  text: "text",
+  bitmap: "bitmap",
+  app: "app",
+  "awtrix-line": "line",
+  "awtrix-rect": "rect",
+  "awtrix-circle": "circle",
+  "awtrix-text": "text",
+  "awtrix-bitmap": "bitmap",
+};
+
+export function resolveElementType(value: string): ElementType | undefined {
+  return hostElementTypeMap[value];
+}
+
+export type DrawCommand =
+  | { dp: [x: number, y: number, color: string] }
+  | { dl: [x0: number, y0: number, x1: number, y1: number, color: string] }
+  | { dr: [x: number, y: number, w: number, h: number, color: string] }
+  | { df: [x: number, y: number, w: number, h: number, color: string] }
+  | { dc: [x: number, y: number, r: number, color: string] }
+  | { dfc: [x: number, y: number, r: number, color: string] }
+  | { dt: [x: number, y: number, text: string, color: string] }
+  | { db: [x: number, y: number, w: number, h: number, bmp: number[]] };
+
+interface BaseInstance {
+  children: AwtrixNode[];
+  hidden: boolean;
+}
+
+export interface PixelInstance extends BaseInstance {
+  type: "pixel";
+  props: PixelProps;
+}
+
+export interface LineInstance extends BaseInstance {
+  type: "line";
+  props: LineProps;
+}
+
+export interface RectInstance extends BaseInstance {
+  type: "rect";
+  props: RectProps;
+}
+
+export interface CircleInstance extends BaseInstance {
+  type: "circle";
+  props: CircleProps;
+}
+
+export interface TextInstance extends BaseInstance {
+  type: "text";
+  props: TextProps;
+}
+
+export interface BitmapInstance extends BaseInstance {
+  type: "bitmap";
+  props: BitmapProps;
+}
+
+export interface AppInstance extends BaseInstance {
+  type: "app";
+  props: AppProps;
+}
+
+export type AwtrixInstance =
+  | PixelInstance
+  | LineInstance
+  | RectInstance
+  | CircleInstance
+  | TextInstance
+  | BitmapInstance
+  | AppInstance;
+
+export interface AwtrixTextInstance {
+  type: "__text";
+  value: string;
+  hidden: boolean;
+}
+
+export type AwtrixNode = AwtrixInstance | AwtrixTextInstance;
+
+export interface RenderOptions {
+  host: string;
+  app: string;
+  port?: number;
+  debug?: boolean;
+  debounce?: number;
+}
+
+export interface NotifyOptions {
+  host: string;
+  port?: number;
+  hold?: boolean;
+  sound?: string;
+  stack?: boolean;
+  wakeup?: boolean;
+  debug?: boolean;
+}
+
+export interface NotifyPayloadOptions {
+  hold?: boolean;
+  sound?: string;
+  stack?: boolean;
+  wakeup?: boolean;
+}
+
+export interface RenderHandle {
+  unmount(): Promise<void>;
+}
+
+export interface AppPayload extends Omit<AppProps, "background" | "progressC" | "progressBC"> {
+  background?: string;
+  progressC?: string;
+  progressBC?: string;
+  draw?: DrawCommand[];
+}
+
+export type AwtrixPayload = AppPayload & NotifyPayloadOptions;
+
+export interface AwtrixContainer {
+  host: string;
+  port: number;
+  appName: string;
+  mode: "app" | "notify";
+  notifyOptions?: NotifyPayloadOptions;
+  children: AwtrixNode[];
+  debug: boolean;
+  debounceMs: number;
+  pendingFlush?: ReturnType<typeof setTimeout>;
+  onFlush?: () => void;
+  onFlushError?: (error: unknown) => void;
+}
+
+function toHexByte(value: number): string {
+  const normalized = Math.max(0, Math.min(255, Math.round(value)));
+  return normalized.toString(16).padStart(2, "0");
+}
+
+export function normalizeColor(color: Color): string {
+  if (typeof color === "string") {
+    if (color.startsWith("#")) {
+      return color.toUpperCase();
+    }
+    return color;
+  }
+
+  const [red, green, blue] = color;
+  return `#${toHexByte(red)}${toHexByte(green)}${toHexByte(blue)}`.toUpperCase();
+}
