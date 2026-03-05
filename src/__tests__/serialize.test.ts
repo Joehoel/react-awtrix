@@ -2,7 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { serialize } from "../serialize.ts";
 import type {
   AppInstance,
+  AwtrixAppContainer,
   AwtrixContainer,
+  AwtrixNotifyContainer,
   AwtrixTextInstance,
   BitmapInstance,
   CircleInstance,
@@ -12,18 +14,42 @@ import type {
   TextInstance,
 } from "../types.ts";
 
+function createContainer(mode: "app"): AwtrixAppContainer;
+function createContainer(mode: "notify"): AwtrixNotifyContainer;
+function createContainer(mode?: "app" | "notify"): AwtrixContainer;
 function createContainer(mode: "app" | "notify" = "app"): AwtrixContainer {
-  return {
+  if (mode === "notify") {
+    const notifyContainer: AwtrixNotifyContainer = {
+      host: "127.0.0.1",
+      port: 80,
+      appName: "serialize-test",
+      mode: "notify",
+      matrixWidth: 32,
+      matrixHeight: 8,
+      children: [],
+      debug: false,
+      debounceMs: 0,
+      requestFlush: async () => {},
+    };
+
+    return notifyContainer;
+  }
+
+  const appContainer: AwtrixAppContainer = {
     host: "127.0.0.1",
     port: 80,
     appName: "serialize-test",
-    mode,
+    mode: "app",
     matrixWidth: 32,
     matrixHeight: 8,
     children: [],
     debug: false,
     debounceMs: 0,
+    requestFlush: async () => {},
+    requestDelete: async () => {},
   };
+
+  return appContainer;
 }
 
 function createTextValue(value: string): AwtrixTextInstance {

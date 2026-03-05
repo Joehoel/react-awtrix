@@ -3,7 +3,13 @@ import { ConcurrentRoot } from "react-reconciler/constants.js";
 import { reconciler } from "./reconciler.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import { DeviceTransport } from "./transport.ts";
-import type { AppHandle, AwtrixContainer, Runtime, RuntimeOptions } from "./types.ts";
+import type {
+  AppHandle,
+  AwtrixAppContainer,
+  AwtrixContainer,
+  Runtime,
+  RuntimeOptions,
+} from "./types.ts";
 
 type RuntimeRoot = ReturnType<typeof reconciler.createContainer>;
 const moduleRuntimeOwner = Symbol("react-awtrix-runtime-owner");
@@ -11,7 +17,7 @@ const moduleRuntimeOwner = Symbol("react-awtrix-runtime-owner");
 interface RuntimeAppEntry {
   name: string;
   root: RuntimeRoot;
-  container: AwtrixContainer;
+  container: AwtrixAppContainer;
   generation: number;
 }
 
@@ -284,7 +290,7 @@ class AwtrixRuntimeImpl implements Runtime {
     this.signalsRegistered = true;
   }
 
-  private createContainer(name: string): AwtrixContainer {
+  private createContainer(name: string): AwtrixAppContainer {
     return {
       host: this.host,
       port: this.port,
@@ -301,6 +307,9 @@ class AwtrixRuntimeImpl implements Runtime {
         }
 
         await this.transport.enqueuePush(name, payload);
+      },
+      requestDelete: async () => {
+        await this.transport.enqueueDelete(name);
       },
     };
   }
@@ -359,7 +368,7 @@ class AwtrixRuntimeImpl implements Runtime {
     }
 
     if (deleteOnDevice) {
-      await this.transport.enqueueDelete(entry.name);
+      await entry.container.requestDelete();
     }
   }
 

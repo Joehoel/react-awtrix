@@ -1,15 +1,30 @@
 import type { ReactNode } from "react";
 import { ConcurrentRoot } from "react-reconciler/constants.js";
+import { deleteApp, pushApp, pushNotify } from "./client.ts";
 import { reconciler } from "./reconciler.ts";
-import { deleteApp } from "./client.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import type {
-  AwtrixContainer,
+  AwtrixAppContainer,
+  AwtrixNotifyContainer,
   NotifyOptions,
   NotifyPayloadOptions,
   RenderHandle,
   RenderOptions,
 } from "./types.ts";
+
+function createOperationQueue(): (operation: () => Promise<void>) => Promise<void> {
+  let chain: Promise<void> = Promise.resolve();
+
+  return (operation) => {
+    const next = chain.then(operation, operation);
+    chain = next.then(
+      () => undefined,
+      () => undefined,
+    );
+
+    return next;
+  };
+}
 
 // ─── render() ──────────────────────────────────────────────────────────────
 
@@ -40,16 +55,48 @@ import type {
  * ```
  */
 export function render(element: ReactNode, options: RenderOptions): RenderHandle {
-  const container: AwtrixContainer = {
-    host: options.host,
-    port: options.port ?? 80,
-    appName: options.app,
+  const host = options.host;
+  const port = options.port ?? 80;
+  const appName = options.app;
+  const enqueueOperation = createOperationQueue();
+  let disposed = false;
+  let deletePromise: Promise<void> | undefined;
+
+  const container: AwtrixAppContainer = {
+    host,
+    port,
+    appName,
     mode: "app",
     matrixWidth: options.width ?? DEFAULT_MATRIX_WIDTH,
     matrixHeight: options.height ?? DEFAULT_MATRIX_HEIGHT,
     children: [],
     debug: options.debug ?? false,
     debounceMs: options.debounce ?? 50,
+    requestFlush: async (payload) => {
+      if (disposed) {
+        return;
+      }
+
+      await enqueueOperation(async () => {
+        if (disposed) {
+          return;
+        }
+
+        await pushApp(host, port, appName, payload);
+      });
+    },
+    requestDelete: () => {
+      if (deletePromise !== undefined) {
+        return deletePromise;
+      }
+
+      disposed = true;
+      deletePromise = enqueueOperation(async () => {
+        await deleteApp(host, port, appName);
+      });
+
+      return deletePromise;
+    },
   };
 
   const root = reconciler.createContainer(
@@ -79,7 +126,7 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
 
       // Delete the app from the device
       try {
-        await deleteApp(container.host, container.port, container.appName);
+        await container.requestDelete();
       } catch (err) {
         console.error("[react-awtrix] Failed to delete app on unmount:", err);
       }
@@ -106,6 +153,9 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
  * ```
  */
 export function notify(element: ReactNode, options: NotifyOptions): Promise<void> {
+  const host = options.host;
+  const port = options.port ?? 80;
+
   const notifyPayloadOptions: NotifyPayloadOptions = {
     hold: options.hold,
     sound: options.sound,
@@ -114,9 +164,9 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
   };
 
   return new Promise((resolve, reject) => {
-    const container: AwtrixContainer = {
-      host: options.host,
-      port: options.port ?? 80,
+    const container: AwtrixNotifyContainer = {
+      host,
+      port,
       appName: "__notify",
       mode: "notify",
       notifyOptions: notifyPayloadOptions,
@@ -128,6 +178,9 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
       onFlush: resolve,
       onFlushError(error) {
         reject(error);
+      },
+      requestFlush: async (payload) => {
+        await pushNotify(host, port, payload);
       },
     };
 

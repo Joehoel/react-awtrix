@@ -239,12 +239,10 @@ export interface AppPayload extends Omit<AppProps, "background" | "progressC" | 
 
 export type AwtrixPayload = AppPayload & NotifyPayloadOptions;
 
-export interface AwtrixContainer {
+interface AwtrixContainerBase {
   host: string;
   port: number;
   appName: string;
-  mode: "app" | "notify";
-  notifyOptions?: NotifyPayloadOptions;
   matrixWidth: number;
   matrixHeight: number;
   children: AwtrixNode[];
@@ -253,8 +251,20 @@ export interface AwtrixContainer {
   pendingFlush?: ReturnType<typeof setTimeout>;
   onFlush?: () => void;
   onFlushError?: (error: unknown) => void;
-  requestFlush?: (payload: AwtrixPayload) => Promise<void>;
+  requestFlush: (payload: AwtrixPayload) => Promise<void>;
 }
+
+export interface AwtrixAppContainer extends AwtrixContainerBase {
+  mode: "app";
+  requestDelete: () => Promise<void>;
+}
+
+export interface AwtrixNotifyContainer extends AwtrixContainerBase {
+  mode: "notify";
+  notifyOptions?: NotifyPayloadOptions;
+}
+
+export type AwtrixContainer = AwtrixAppContainer | AwtrixNotifyContainer;
 
 function toHexByte(value: number): string {
   const normalized = Math.max(0, Math.min(255, Math.round(value)));

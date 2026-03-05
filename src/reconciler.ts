@@ -1,5 +1,4 @@
 import ReactReconciler from "react-reconciler";
-import { pushApp, pushNotify } from "./client.ts";
 import {
   parseAppProps,
   parseBitmapProps,
@@ -84,13 +83,7 @@ function scheduleFlush(container: AwtrixContainer): void {
     }
 
     try {
-      if (container.requestFlush !== undefined) {
-        await container.requestFlush(payload);
-      } else if (container.mode === "notify") {
-        await pushNotify(container.host, container.port, payload);
-      } else {
-        await pushApp(container.host, container.port, container.appName, payload);
-      }
+      await container.requestFlush(payload);
 
       if (container.onFlush !== undefined) {
         container.onFlush();
