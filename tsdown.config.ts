@@ -11,4 +11,5 @@ export default defineConfig({
   clean: true,
   platform: "node",
   target: "node18",
+  exports: true
 });
