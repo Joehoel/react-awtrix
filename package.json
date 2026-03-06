@@ -18,6 +18,7 @@
     "example:complex": "bun run examples/complex.tsx",
     "example:pomodoro": "bun run examples/pomodoro.tsx",
     "example:mqtt": "bun run examples/mqtt.tsx",
+    "example:mqtt:local": "AWTRIX_MQTT_LOCAL_BROKER=1 bun run examples/mqtt.tsx",
     "example:server": "bun --hot examples/server.tsx"
   },
   "devDependencies": {
@@ -30,6 +31,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "aedes": "^1.0.0",
     "arktype": "^2.2.0",
     "mqtt": "^5.15.0",
     "react": "^19.2.4",

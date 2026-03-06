@@ -48,13 +48,35 @@ render(
 
 ### MQTT
 
+You can use a public broker if you do not run your own:
+
+```env
+AWTRIX_MQTT_BROKER=mqtt://broker.hivemq.com:1883
+AWTRIX_MQTT_PREFIX=awtrix_demo
+```
+
+Or run a local broker in the same process as `examples/mqtt.tsx`:
+
+```env
+AWTRIX_MQTT_LOCAL_BROKER=1
+AWTRIX_MQTT_LOCAL_PORT=18884
+AWTRIX_MQTT_PREFIX=awtrix_demo
+```
+
+When local broker mode is on, the example prints your LAN IP and port so you can point the Awtrix MQTT server setting to that machine. If the configured port is taken, it automatically picks a free port and logs it.
+
+Then:
+
 ```tsx
 import { AwtrixApp, AwtrixText, createRuntime, mqtt } from "react-awtrix";
 
+const broker = process.env.AWTRIX_MQTT_BROKER ?? "mqtt://broker.hivemq.com:1883";
+const prefix = process.env.AWTRIX_MQTT_PREFIX ?? "awtrix_demo";
+
 const runtime = createRuntime({
   protocol: mqtt({
-    broker: "mqtt://192.168.1.20",
-    prefix: "awtrix_abcd",
+    broker,
+    prefix,
   }),
 });
 
