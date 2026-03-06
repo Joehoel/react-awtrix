@@ -1,15 +1,29 @@
 {
   "name": "react-awtrix",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
-  "main": "index.ts",
-  "module": "index.ts",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
-    ".": "./index.ts",
-    "./jsx-runtime": "./jsx-runtime.ts",
-    "./jsx-dev-runtime": "./jsx-dev-runtime.ts"
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime.d.mts",
+      "import": "./dist/jsx-runtime.mjs"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/jsx-dev-runtime.d.mts",
+      "import": "./dist/jsx-dev-runtime.mjs"
+    }
   },
   "scripts": {
+    "build": "tsdown",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
@@ -41,7 +55,8 @@
     "@types/react-reconciler": "^0.33.0",
     "knip": "^5.85.0",
     "oxfmt": "^0.36.0",
-    "oxlint": "^1.51.0"
+    "oxlint": "^1.51.0",
+    "tsdown": "^0.21.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

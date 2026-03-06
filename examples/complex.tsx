@@ -8,7 +8,7 @@ import {
   AwtrixRect,
   AwtrixText,
   render,
-} from "../index.ts";
+} from "../src/index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {

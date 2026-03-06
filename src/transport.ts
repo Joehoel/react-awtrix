@@ -160,7 +160,9 @@ export class DeviceTransport {
     const remainingDelay = this.minIntervalMs - elapsed;
 
     if (remainingDelay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, remainingDelay));
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, remainingDelay);
+      });
     }
   }
 }
