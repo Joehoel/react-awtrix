@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/index.ts", "examples/*.tsx"],
+  "project": ["src/**/*.ts", "src/**/*.tsx", "examples/**/*.tsx"],
+  "ignoreDependencies": ["@total-typescript/tsconfig"],
+  "ignoreBinaries": ["tsc"],
+  "ignoreExportsUsedInFile": true
+}
