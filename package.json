@@ -1,16 +1,52 @@
 {
   "name": "react-awtrix",
+  "version": "0.0.1",
   "private": true,
   "files": [
     "dist"
   ],
   "type": "module",
-  "types": "./dist/index.d.mts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "exports": {
-    ".": "./dist/index.mjs",
-    "./jsx-dev-runtime": "./dist/jsx-dev-runtime.mjs",
-    "./jsx-runtime": "./dist/jsx-runtime.mjs",
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./jsx-dev-runtime": {
+      "import": {
+        "types": "./dist/jsx-dev-runtime.d.mts",
+        "default": "./dist/jsx-dev-runtime.mjs"
+      },
+      "require": {
+        "types": "./dist/jsx-dev-runtime.d.cts",
+        "default": "./dist/jsx-dev-runtime.cjs"
+      }
+    },
+    "./jsx-runtime": {
+      "import": {
+        "types": "./dist/jsx-runtime.d.mts",
+        "default": "./dist/jsx-runtime.mjs"
+      },
+      "require": {
+        "types": "./dist/jsx-runtime.d.cts",
+        "default": "./dist/jsx-runtime.cjs"
+      }
+    },
     "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "jsx-runtime": ["./dist/jsx-runtime.d.mts"],
+      "jsx-dev-runtime": ["./dist/jsx-dev-runtime.d.mts"]
+    }
   },
   "scripts": {
     "build": "tsdown",
@@ -39,6 +75,7 @@
     "react-reconciler": "^0.33.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.2",
     "@total-typescript/tsconfig": "^1.0.4",
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
@@ -46,6 +83,7 @@
     "knip": "^5.85.0",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
+    "publint": "^0.3.18",
     "tsdown": "^0.21.0"
   },
   "peerDependencies": {

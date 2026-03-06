@@ -6,10 +6,12 @@ export default defineConfig({
     "jsx-runtime": "src/jsx-runtime.ts",
     "jsx-dev-runtime": "src/jsx-dev-runtime.ts",
   },
-  format: "esm",
+  format: ["esm", "cjs"],
   dts: true,
   clean: true,
   platform: "node",
   target: "node18",
-  exports: true
+  exports: false,
+  publint: true,
+  attw: true,
 });
