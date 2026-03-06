@@ -1,9 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  mqtt,
-  type MqttClientLike,
-  type MqttProtocolDependencies,
-} from "../protocols/mqtt.ts";
+import { mqtt, type MqttClientLike, type MqttProtocolDependencies } from "../protocols/mqtt.ts";
 
 interface PublishCall {
   topic: string;
@@ -133,7 +129,8 @@ describe("mqtt protocol", () => {
     };
 
     const dependencies: MqttProtocolDependencies = {
-      connectClient: (_broker) => createStubClient(publishes, subscriptions, endCalls, messageHarness),
+      connectClient: (_broker) =>
+        createStubClient(publishes, subscriptions, endCalls, messageHarness),
     };
 
     const protocol = mqtt(
@@ -149,7 +146,9 @@ describe("mqtt protocol", () => {
 
     expect(endCalls).toEqual([1]);
     expect(subscriptions).toEqual([]);
-    await expect(protocol.pushNotify({ text: "late" })).rejects.toThrow("MQTT protocol is disposed");
+    await expect(protocol.pushNotify({ text: "late" })).rejects.toThrow(
+      "MQTT protocol is disposed",
+    );
   });
 
   test("subscribes to mqtt stats topics and emits runtime events", async () => {
@@ -161,7 +160,8 @@ describe("mqtt protocol", () => {
     };
 
     const dependencies: MqttProtocolDependencies = {
-      connectClient: (_broker) => createStubClient(publishes, subscriptions, endCalls, messageHarness),
+      connectClient: (_broker) =>
+        createStubClient(publishes, subscriptions, endCalls, messageHarness),
     };
 
     const protocol = mqtt(

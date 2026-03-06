@@ -1,5 +1,13 @@
 import type { ReactNode } from "react";
-import type { AppProps, BitmapProps, CircleProps, LineProps, PixelProps, RectProps, TextProps } from "./types.ts";
+import type {
+  AppProps,
+  BitmapProps,
+  CircleProps,
+  LineProps,
+  PixelProps,
+  RectProps,
+  TextProps,
+} from "./types.ts";
 
 export interface AwtrixAppComponentProps extends AppProps {
   children?: ReactNode;

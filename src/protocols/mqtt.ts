@@ -251,13 +251,14 @@ export function mqtt(
     stats: new Set(),
     device: new Set(),
   };
-  const eventByTopic = new Map<string, keyof AwtrixProtocolEventMap>();
-  eventByTopic.set(topicByEvent["button:left"], "button:left");
-  eventByTopic.set(topicByEvent["button:select"], "button:select");
-  eventByTopic.set(topicByEvent["button:right"], "button:right");
-  eventByTopic.set(topicByEvent.currentApp, "currentApp");
-  eventByTopic.set(topicByEvent.stats, "stats");
-  eventByTopic.set(topicByEvent.device, "device");
+  const eventByTopic = new Map<string, keyof AwtrixProtocolEventMap>([
+    [topicByEvent["button:left"], "button:left"],
+    [topicByEvent["button:select"], "button:select"],
+    [topicByEvent["button:right"], "button:right"],
+    [topicByEvent.currentApp, "currentApp"],
+    [topicByEvent.stats, "stats"],
+    [topicByEvent.device, "device"],
+  ]);
   const localTopicRefs = new Map<string, number>();
   let disposed = false;
 

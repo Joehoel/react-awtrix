@@ -78,10 +78,7 @@ describe("virtual Awtrix device", () => {
     expect(third.status).toBe(200);
 
     expect(device.getNotificationCount()).toBe(3);
-    expect(device.getActiveNotifications()).toEqual([
-      { text: "C", stack: false },
-      { text: "B" },
-    ]);
+    expect(device.getActiveNotifications()).toEqual([{ text: "C", stack: false }, { text: "B" }]);
 
     const lastNotification = device.getLastNotification();
     expect(lastNotification).toEqual({ text: "C", stack: false });
@@ -125,7 +122,11 @@ describe("virtual Awtrix device", () => {
     expect(device.isMatrixPoweredOn()).toBe(false);
     expect(device.getSleepSeconds()).toBe(15);
 
-    const settingsPost = await post(device, "/api/settings", '{"BRI":170,"OVERLAY":"rain","MATP":true}');
+    const settingsPost = await post(
+      device,
+      "/api/settings",
+      '{"BRI":170,"OVERLAY":"rain","MATP":true}',
+    );
     expect(settingsPost.status).toBe(200);
 
     const settingsGet = await get(device, "/api/settings");
@@ -139,7 +140,11 @@ describe("virtual Awtrix device", () => {
   });
 
   test("mirrors indicator and moodlight parser behavior", async () => {
-    const indicatorOn = await post(device, "/api/indicator1", '{"color":[255,0,0],"blink":500,"fade":250}');
+    const indicatorOn = await post(
+      device,
+      "/api/indicator1",
+      '{"color":[255,0,0],"blink":500,"fade":250}',
+    );
     expect(indicatorOn.status).toBe(200);
     expect(device.getIndicatorState(1)).toEqual({
       enabled: true,
@@ -161,7 +166,11 @@ describe("virtual Awtrix device", () => {
     expect(invalidIndicator.status).toBe(500);
     expect(await invalidIndicator.text()).toBe("ErrorParsingJson");
 
-    const moodlightOn = await post(device, "/api/moodlight", '{"brightness":170,"color":"#336699"}');
+    const moodlightOn = await post(
+      device,
+      "/api/moodlight",
+      '{"brightness":170,"color":"#336699"}',
+    );
     expect(moodlightOn.status).toBe(200);
     expect(device.isMoodlightEnabled()).toBe(true);
     expect(device.getMoodlightPayload()).toEqual({ brightness: 170, color: "#336699" });

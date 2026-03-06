@@ -5,6 +5,8 @@ import { createRuntime } from "../runtime.ts";
 import { createVirtualAwtrixDevice, type VirtualAwtrixDevice } from "../test/virtual-device.ts";
 import type { AwtrixProtocol, Runtime } from "../types.ts";
 
+const noop = (_payload: { pressed: boolean; raw: string }): void => {};
+
 interface RuntimeTestContext {
   device: VirtualAwtrixDevice;
   runtime: Runtime;
@@ -142,7 +144,7 @@ describe("runtime", () => {
 
     expect(clockPayload.draw).toEqual([{ dt: [0, 0, "CLOCK", "#FFFFFF"] }]);
     expect(weatherPayload.draw).toEqual([{ dt: [0, 0, "WX", "#FFFFFF"] }]);
-    expect(context.runtime.apps().sort()).toEqual(["clock", "weather"]);
+    expect(context.runtime.apps().toSorted()).toEqual(["clock", "weather"]);
   });
 
   test("upserts app by name and updates existing root", async () => {
@@ -275,11 +277,9 @@ describe("runtime", () => {
 
     const runtime = context.runtime;
 
-    const handler = (_payload: { pressed: boolean; raw: string }): void => {};
-
     expect(() => {
-      runtime.on("button:left", handler);
-    }).toThrow('does not support subscriptions');
+      runtime.on("button:left", noop);
+    }).toThrow("does not support subscriptions");
   });
 
   test("forwards protocol events and unsubscribes via off", async () => {
@@ -314,9 +314,8 @@ describe("runtime", () => {
   test("dispose unsubscribes protocol listeners", async () => {
     const harness = createMqttRuntimeHarness("dispose");
     const runtime = createRuntime({ protocol: harness.protocol });
-    const listener = (_payload: { pressed: boolean; raw: string }): void => {};
 
-    runtime.on("button:left", listener);
+    runtime.on("button:left", noop);
     await runtime.dispose();
 
     expect(harness.subscriptions).toEqual([

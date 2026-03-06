@@ -1,0 +1,60 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "pedantic": "warn",
+    "perf": "warn",
+    "style": "off"
+  },
+  "plugins": ["typescript", "react", "import", "unicorn", "oxc"],
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "error",
+    "no-alert": "error",
+    "no-inline-comments": "off",
+    "no-await-in-loop": "off",
+    "typescript/no-explicit-any": "warn",
+    "typescript/consistent-type-imports": "warn",
+    "typescript/no-non-null-assertion": "warn",
+    "import/no-cycle": "error",
+    "import/no-self-import": "error",
+    "react/react-in-jsx-scope": "off",
+    "unicorn/no-null": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "unicorn/filename-case": "off",
+    "unicorn/prevent-abbreviations": "off",
+    "unicorn/no-nested-ternary": "off",
+    "unicorn/no-useless-undefined": "off",
+    "max-lines": "off",
+    "max-lines-per-function": "off"
+  },
+  "overrides": [
+    {
+      "files": ["examples/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["src/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"],
+      "rules": {
+        "typescript/no-explicit-any": "off",
+        "typescript/no-non-null-assertion": "off",
+        "require-await": "off"
+      }
+    },
+    {
+      "files": ["src/test/**"],
+      "rules": {
+        "require-await": "off"
+      }
+    }
+  ]
+}

@@ -98,15 +98,15 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
 
   const root = reconciler.createContainer(
     container,
-    ConcurrentRoot,       // tag
-    null,                  // hydration callbacks
-    false,                 // isStrictMode
-    null,                  // concurrentUpdatesByDefaultOverride
-    "awtrix",              // identifierPrefix
+    ConcurrentRoot, // tag
+    null, // hydration callbacks
+    false, // isStrictMode
+    null, // concurrentUpdatesByDefaultOverride
+    "awtrix", // identifierPrefix
     (err) => console.error("[react-awtrix] Uncaught:", err),
     (err) => console.error("[react-awtrix] Caught:", err),
     (err) => console.error("[react-awtrix] Recoverable:", err),
-    () => {},              // onDefaultTransitionIndicator
+    () => {}, // onDefaultTransitionIndicator
   );
 
   reconciler.updateContainer(element, root, null, null);
@@ -185,7 +185,10 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
       false,
       null,
       "awtrix-notify",
-      (err) => { console.error("[react-awtrix] Uncaught:", err); reject(err); },
+      (err) => {
+        console.error("[react-awtrix] Uncaught:", err);
+        reject(err);
+      },
       (err) => console.error("[react-awtrix] Caught:", err),
       (err) => console.error("[react-awtrix] Recoverable:", err),
       () => {},

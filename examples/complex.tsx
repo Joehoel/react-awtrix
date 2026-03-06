@@ -12,7 +12,9 @@ import {
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
-  throw new Error("Missing AWTRIX_HOST. Example: AWTRIX_HOST=192.168.1.45 bun run examples/complex.tsx");
+  throw new Error(
+    "Missing AWTRIX_HOST. Example: AWTRIX_HOST=192.168.1.45 bun run examples/complex.tsx",
+  );
 }
 
 function nextSeriesFrame(current: number[], tick: number): number[] {
@@ -76,14 +78,15 @@ function ComplexApp() {
       <AwtrixRect x={0} y={0} width={32} height={8} color="#06080F" filled />
       <AwtrixLine x1={0} y1={7} x2={31} y2={7} color="#1F2933" />
 
-      {series.map((height, index) => (
+      {series.map((height, barIndex) => (
         <AwtrixRect
-          key={`bar-${index}`}
-          x={index * 2}
+          // oxlint-disable-next-line react/no-array-index-key -- position-dependent bars where index is the identity
+          key={`bar-x${barIndex * 2}`}
+          x={barIndex * 2}
           y={6 - height}
           width={1}
           height={height}
-          color={index % 2 === 0 ? "#3BAA6F" : "#2F8F5B"}
+          color={barIndex % 2 === 0 ? "#3BAA6F" : "#2F8F5B"}
           filled
         />
       ))}

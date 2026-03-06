@@ -149,8 +149,7 @@ describe("runtime HMR", () => {
     };
 
     const legacyKey = http({ host: device.host, port: device.port }).key;
-    const legacyRegistry = new Map<string, unknown>();
-    legacyRegistry.set(legacyKey, legacyRuntime);
+    const legacyRegistry = new Map<string, unknown>([[legacyKey, legacyRuntime]]);
     Reflect.set(globalThis, "__react_awtrix_runtime_registry__", legacyRegistry);
 
     const runtime = createRuntime(options);

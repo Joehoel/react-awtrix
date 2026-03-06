@@ -25,7 +25,9 @@ describe("props validation", () => {
       color: "#00FF00",
     });
 
-    expect(parseRectProps({ x: 0, y: 0, width: 4, height: 2, color: "blue", filled: true })).toEqual({
+    expect(
+      parseRectProps({ x: 0, y: 0, width: 4, height: 2, color: "blue", filled: true }),
+    ).toEqual({
       x: 0,
       y: 0,
       width: 4,
@@ -85,12 +87,18 @@ describe("props validation", () => {
 
   test("throws descriptive errors for invalid props", () => {
     expect(() => parsePixelProps({ x: 0, y: 1 })).toThrow("<awtrix-pixel>");
-    expect(() => parseLineProps({ x1: 0, y1: 0, x2: 1, y2: "2", color: "red" })).toThrow("<awtrix-line>");
-    expect(() => parseRectProps({ x: 0, y: 0, width: 1, height: 1, color: "red", filled: "yes" })).toThrow(
-      "<awtrix-rect>",
+    expect(() => parseLineProps({ x1: 0, y1: 0, x2: 1, y2: "2", color: "red" })).toThrow(
+      "<awtrix-line>",
     );
-    expect(() => parseCircleProps({ x: 0, y: 0, radius: "1", color: "red" })).toThrow("<awtrix-circle>");
-    expect(() => parseTextProps({ x: 0, y: 0, color: "red", maxWidth: 0 })).toThrow("<awtrix-text>");
+    expect(() =>
+      parseRectProps({ x: 0, y: 0, width: 1, height: 1, color: "red", filled: "yes" }),
+    ).toThrow("<awtrix-rect>");
+    expect(() => parseCircleProps({ x: 0, y: 0, radius: "1", color: "red" })).toThrow(
+      "<awtrix-circle>",
+    );
+    expect(() => parseTextProps({ x: 0, y: 0, color: "red", maxWidth: 0 })).toThrow(
+      "<awtrix-text>",
+    );
     expect(() => parseBitmapProps({ x: 0, y: 0, width: 2, height: 2, data: "invalid" })).toThrow(
       "<awtrix-bitmap>",
     );

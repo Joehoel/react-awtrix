@@ -85,7 +85,10 @@ export function createRenderTestContext(options: RenderTestContextOptions = {}):
     return trackedHandle;
   }
 
-  function notifyWithDevice(element: ReactNode, notifyOptions: NotifyWithDeviceOptions = {}): Promise<void> {
+  function notifyWithDevice(
+    element: ReactNode,
+    notifyOptions: NotifyWithDeviceOptions = {},
+  ): Promise<void> {
     const optionsForNotify: NotifyOptions = {
       host: device.host,
       port: device.port,
@@ -101,7 +104,10 @@ export function createRenderTestContext(options: RenderTestContextOptions = {}):
     return notify(element, optionsForNotify);
   }
 
-  async function waitForAppPayload(appName = defaultApp, timeoutMs = defaultTimeoutMs): Promise<AwtrixPayload> {
+  async function waitForAppPayload(
+    appName = defaultApp,
+    timeoutMs = defaultTimeoutMs,
+  ): Promise<AwtrixPayload> {
     return device.waitForApp(appName, timeoutMs);
   }
 

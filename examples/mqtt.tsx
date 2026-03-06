@@ -117,7 +117,7 @@ if (localBrokerEnabled) {
     await listenServer(localServer, 0);
     const detectedPort = serverPort(localServer);
     if (detectedPort === undefined) {
-      throw new Error("[react-awtrix] Failed to detect local MQTT broker port.");
+      throw new Error("[react-awtrix] Failed to detect local MQTT broker port.", { cause: error });
     }
 
     activeLocalPort = detectedPort;
@@ -181,9 +181,7 @@ process.on("SIGTERM", () => {
   void shutdown("SIGTERM");
 });
 
-console.log(
-  `[react-awtrix] Running MQTT example on ${broker} (${prefix}). Press Ctrl+C to exit.`,
-);
+console.log(`[react-awtrix] Running MQTT example on ${broker} (${prefix}). Press Ctrl+C to exit.`);
 
 if (localBrokerEnabled) {
   const activeLocalPort = resolvedLocalPort ?? localBrokerPort;

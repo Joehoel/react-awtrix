@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { useEffect, useMemo, useState } from "react";
-import { AwtrixApp, AwtrixBitmap, AwtrixCircle, AwtrixLine, AwtrixPixel, AwtrixRect, AwtrixText } from "../components.tsx";
+import {
+  AwtrixApp,
+  AwtrixBitmap,
+  AwtrixCircle,
+  AwtrixLine,
+  AwtrixPixel,
+  AwtrixRect,
+  AwtrixText,
+} from "../components.tsx";
 import { createRenderTestContext, type RenderTestContext } from "../test/render-test.ts";
 
 describe("reconciler integration", () => {
@@ -74,7 +82,7 @@ describe("reconciler integration", () => {
     await context.waitForAppDeletion();
 
     const requests = context.device.getCustomRequests();
-    expect(requests[requests.length - 1]).toEqual({
+    expect(requests.at(-1)).toEqual({
       name: "unmount-app",
       deleted: true,
     });
@@ -147,7 +155,9 @@ describe("reconciler integration", () => {
 
     await context.device.waitForCustomRequestCount(3, 2000);
 
-    const requestCount = context.device.getCustomRequests().filter((request) => !request.deleted).length;
+    const requestCount = context.device
+      .getCustomRequests()
+      .filter((request) => !request.deleted).length;
     expect(requestCount).toBeGreaterThanOrEqual(3);
 
     const payload = await context.waitForAppPayload();
@@ -187,14 +197,15 @@ describe("reconciler integration", () => {
           <AwtrixLine x1={0} y1={0} x2={31} y2={0} color="#1E90FF" />
           <AwtrixCircle x={23} y={3} radius={2} color="#FFAA00" filled={mode === "live"} />
 
-          {bars.map((height, index) => (
+          {bars.map((height, barIndex) => (
             <AwtrixRect
-              key={`bar-${index}`}
-              x={index * 2}
+              // oxlint-disable-next-line react/no-array-index-key -- position-dependent bars where index is the identity
+              key={`bar-x${barIndex * 2}`}
+              x={barIndex * 2}
               y={7 - height}
               width={1}
               height={height}
-              color={index % 2 === 0 ? "#2ECC71" : "#27AE60"}
+              color={barIndex % 2 === 0 ? "#2ECC71" : "#27AE60"}
               filled
             />
           ))}

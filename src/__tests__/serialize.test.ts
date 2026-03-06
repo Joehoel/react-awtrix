@@ -166,13 +166,16 @@ describe("serialize", () => {
     };
 
     const container = createContainer("app");
-    container.children = [outsidePixel, clippedFilledRect, hiddenLine, clippedText, fullyHiddenText];
+    container.children = [
+      outsidePixel,
+      clippedFilledRect,
+      hiddenLine,
+      clippedText,
+      fullyHiddenText,
+    ];
 
     expect(serialize(container)).toEqual({
-      draw: [
-        { df: [30, 6, 2, 2, "#FFFF00"] },
-        { dt: [28, 7, "H", "white"] },
-      ],
+      draw: [{ df: [30, 6, 2, 2, "#FFFF00"] }, { dt: [28, 7, "H", "white"] }],
     });
   });
 

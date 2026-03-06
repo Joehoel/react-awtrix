@@ -232,6 +232,10 @@ function readPowerOption(jsonText: string, parsed: unknown): boolean | undefined
   return undefined;
 }
 
+function clampChannel(channel: number): number {
+  return Math.min(255, Math.max(0, Math.round(channel)));
+}
+
 function readColorValue(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isInteger(value)) {
     const clamped = Math.min(0xffffff, Math.max(0, value));
@@ -261,10 +265,6 @@ function readColorValue(value: unknown): number | undefined {
     const blue = readNumber(value[2]);
 
     if (red !== undefined && green !== undefined && blue !== undefined) {
-      const clampChannel = (channel: number): number => {
-        return Math.min(255, Math.max(0, Math.round(channel)));
-      };
-
       return (clampChannel(red) << 16) | (clampChannel(green) << 8) | clampChannel(blue);
     }
   }
@@ -623,7 +623,7 @@ export class VirtualAwtrixDevice {
   }
 
   getLastNotification(): AwtrixPayload | undefined {
-    const payload = this.notificationRequests[this.notificationRequests.length - 1];
+    const payload = this.notificationRequests.at(-1);
     if (payload === undefined) {
       return undefined;
     }
@@ -743,7 +743,7 @@ export class VirtualAwtrixDevice {
   }
 
   private deleteCustomAppsByPrefix(prefix: string): void {
-    for (const name of [...this.apps.keys()]) {
+    for (const name of this.apps.keys()) {
       if (name.startsWith(prefix)) {
         this.apps.delete(name);
       }
@@ -1407,6 +1407,8 @@ export class VirtualAwtrixDevice {
   }
 }
 
-export function createVirtualAwtrixDevice(options: VirtualAwtrixDeviceOptions = {}): VirtualAwtrixDevice {
+export function createVirtualAwtrixDevice(
+  options: VirtualAwtrixDeviceOptions = {},
+): VirtualAwtrixDevice {
   return new VirtualAwtrixDevice(options);
 }

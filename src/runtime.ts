@@ -487,11 +487,31 @@ class AwtrixRuntimeImpl implements Runtime {
   }
 
   private reportError(appName: string, error: unknown): void {
-    console.error(`[react-awtrix] Runtime app \"${appName}\" error:`, error);
+    console.error(`[react-awtrix] Runtime app "${appName}" error:`, error);
 
     if (this.onError !== undefined) {
       this.onError(appName, error);
     }
+  }
+}
+
+function disposeLegacyRuntime(existingRuntime: unknown): void {
+  const disposeMethod = Reflect.get(existingRuntime as object, "dispose");
+
+  if (typeof disposeMethod !== "function") {
+    return;
+  }
+
+  try {
+    const disposeResult = disposeMethod.call(existingRuntime);
+
+    if (disposeResult instanceof Promise) {
+      void disposeResult.catch((error: unknown) => {
+        console.error("[react-awtrix] Legacy runtime disposal failed:", error);
+      });
+    }
+  } catch (error) {
+    console.error("[react-awtrix] Legacy runtime disposal threw:", error);
   }
 }
 
@@ -506,23 +526,15 @@ export function createRuntime(options: RuntimeOptions): Runtime {
     const hotHandoffMethod = Reflect.get(existingRuntime, "hotHandoff");
 
     if (typeof ownsMethod !== "function" || typeof hotHandoffMethod !== "function") {
-      const disposeMethod = Reflect.get(existingRuntime, "dispose");
+      disposeLegacyRuntime(existingRuntime);
 
-      if (typeof disposeMethod === "function") {
-        try {
-          const disposeResult = disposeMethod.call(existingRuntime);
-
-          if (disposeResult instanceof Promise) {
-            void disposeResult.catch((error: unknown) => {
-              console.error("[react-awtrix] Legacy runtime disposal failed:", error);
-            });
-          }
-        } catch (error) {
-          console.error("[react-awtrix] Legacy runtime disposal threw:", error);
-        }
-      }
-
-      const nextRuntime = new AwtrixRuntimeImpl(options, protocol, registry, key, moduleRuntimeOwner);
+      const nextRuntime = new AwtrixRuntimeImpl(
+        options,
+        protocol,
+        registry,
+        key,
+        moduleRuntimeOwner,
+      );
       registry.set(key, nextRuntime);
 
       if (options.hmr === true) {
@@ -536,7 +548,13 @@ export function createRuntime(options: RuntimeOptions): Runtime {
 
     if (!existingRuntime.owns(moduleRuntimeOwner)) {
       const carryoverApps = existingRuntime.hotHandoff();
-      const nextRuntime = new AwtrixRuntimeImpl(options, protocol, registry, key, moduleRuntimeOwner);
+      const nextRuntime = new AwtrixRuntimeImpl(
+        options,
+        protocol,
+        registry,
+        key,
+        moduleRuntimeOwner,
+      );
       registry.set(key, nextRuntime);
 
       if (hmrEnabled) {

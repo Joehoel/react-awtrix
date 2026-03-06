@@ -1,4 +1,11 @@
-import type { AppPayload, AwtrixContainer, AwtrixInstance, AwtrixNode, AwtrixPayload, DrawCommand } from "./types.ts";
+import type {
+  AppPayload,
+  AwtrixContainer,
+  AwtrixInstance,
+  AwtrixNode,
+  AwtrixPayload,
+  DrawCommand,
+} from "./types.ts";
 import { DEFAULT_TEXT_CHAR_WIDTH, normalizeColor } from "./types.ts";
 
 function collectText(children: AwtrixNode[]): string {
@@ -45,7 +52,11 @@ function clipFilledRect(
   return [left, top, clippedWidth, clippedHeight];
 }
 
-function clipTextToMatrix(text: string, instance: AwtrixInstance, container: AwtrixContainer): string {
+function clipTextToMatrix(
+  text: string,
+  instance: AwtrixInstance,
+  container: AwtrixContainer,
+): string {
   if (instance.type !== "text") {
     return text;
   }
@@ -78,7 +89,10 @@ function clipTextToMatrix(text: string, instance: AwtrixInstance, container: Awt
   return text.slice(0, maxChars);
 }
 
-function serializeInstance(instance: AwtrixInstance, container: AwtrixContainer): DrawCommand | null {
+function serializeInstance(
+  instance: AwtrixInstance,
+  container: AwtrixContainer,
+): DrawCommand | null {
   if (instance.hidden) {
     return null;
   }
@@ -118,13 +132,7 @@ function serializeInstance(instance: AwtrixInstance, container: AwtrixContainer)
       }
 
       return {
-        df: [
-          clipped[0],
-          clipped[1],
-          clipped[2],
-          clipped[3],
-          normalizeColor(instance.props.color),
-        ],
+        df: [clipped[0], clipped[1], clipped[2], clipped[3], normalizeColor(instance.props.color)],
       };
     }
 
@@ -169,12 +177,7 @@ function serializeInstance(instance: AwtrixInstance, container: AwtrixContainer)
     }
 
     return {
-      dt: [
-        instance.props.x,
-        instance.props.y,
-        clippedText,
-        normalizeColor(instance.props.color),
-      ],
+      dt: [instance.props.x, instance.props.y, clippedText, normalizeColor(instance.props.color)],
     };
   }
 
@@ -193,7 +196,11 @@ function serializeInstance(instance: AwtrixInstance, container: AwtrixContainer)
   return null;
 }
 
-function collectDrawCommands(nodes: AwtrixNode[], commands: DrawCommand[], container: AwtrixContainer): void {
+function collectDrawCommands(
+  nodes: AwtrixNode[],
+  commands: DrawCommand[],
+  container: AwtrixContainer,
+): void {
   for (const node of nodes) {
     if (node.hidden || node.type === "__text") {
       continue;
@@ -258,13 +265,16 @@ function collectAppProps(nodes: AwtrixNode[]): AppPayload {
         center: node.props.center,
         noScroll: node.props.noScroll,
         scrollSpeed: node.props.scrollSpeed,
-        background: node.props.background === undefined ? undefined : normalizeColor(node.props.background),
+        background:
+          node.props.background === undefined ? undefined : normalizeColor(node.props.background),
         effect: node.props.effect,
         effectSettings: node.props.effectSettings,
         overlay: node.props.overlay,
         progress: node.props.progress,
-        progressC: node.props.progressC === undefined ? undefined : normalizeColor(node.props.progressC),
-        progressBC: node.props.progressBC === undefined ? undefined : normalizeColor(node.props.progressBC),
+        progressC:
+          node.props.progressC === undefined ? undefined : normalizeColor(node.props.progressC),
+        progressBC:
+          node.props.progressBC === undefined ? undefined : normalizeColor(node.props.progressBC),
         bar: node.props.bar,
         line: node.props.line,
         rainbow: node.props.rainbow,
@@ -293,7 +303,8 @@ export function serialize(container: AwtrixContainer): AwtrixPayload {
     if (container.notifyOptions.hold !== undefined) payload.hold = container.notifyOptions.hold;
     if (container.notifyOptions.sound !== undefined) payload.sound = container.notifyOptions.sound;
     if (container.notifyOptions.stack !== undefined) payload.stack = container.notifyOptions.stack;
-    if (container.notifyOptions.wakeup !== undefined) payload.wakeup = container.notifyOptions.wakeup;
+    if (container.notifyOptions.wakeup !== undefined)
+      payload.wakeup = container.notifyOptions.wakeup;
   }
 
   return payload;

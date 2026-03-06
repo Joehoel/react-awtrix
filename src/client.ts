@@ -26,11 +26,7 @@ export async function pushApp(
   }
 }
 
-export async function deleteApp(
-  host: string,
-  port: number,
-  name: string,
-): Promise<void> {
+export async function deleteApp(host: string, port: number, name: string): Promise<void> {
   const res = await fetch(url(host, port, `/api/custom?name=${name}`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },

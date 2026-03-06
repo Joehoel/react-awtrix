@@ -39,4 +39,5 @@ declare module "react/jsx-runtime" {
   }
 }
 
+// oxlint-disable-next-line unicorn/require-module-specifiers -- required to make this a module for `declare global`
 export {};

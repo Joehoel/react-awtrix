@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  AwtrixApp,
-  AwtrixPixel,
-  AwtrixRect,
-  AwtrixText,
-  createRuntime,
-} from "../index.ts";
+import { AwtrixApp, AwtrixPixel, AwtrixRect, AwtrixText, createRuntime } from "../index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
@@ -60,14 +54,7 @@ function PulseApp() {
     <AwtrixApp icon="87" duration={8} background="#110A1F" noScroll>
       <AwtrixRect x={0} y={0} width={32} height={8} color="#110A1F" filled />
       <AwtrixRect x={0} y={6} width={32} height={1} color="#2F2447" filled />
-      <AwtrixRect
-        x={0}
-        y={6}
-        width={tick + 1}
-        height={1}
-        color="#FF7B54"
-        filled
-      />
+      <AwtrixRect x={0} y={6} width={tick + 1} height={1} color="#FF7B54" filled />
       <AwtrixPixel x={tick} y={5} color="#FFD166" />
       <AwtrixText x={0} y={0} color="#FFFFFF">
         PULSE!

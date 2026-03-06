@@ -1,9 +1,9 @@
 {
   "name": "react-awtrix",
-  "module": "index.ts",
-  "main": "index.ts",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "module": "index.ts",
   "exports": {
     ".": "./index.ts",
     "./jsx-runtime": "./jsx-runtime.ts",
@@ -12,6 +12,11 @@
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "check": "bun run typecheck && bun run lint && bun run format:check",
     "example:hello": "bun run examples/hello.tsx",
     "example:clock": "bun run examples/clock.tsx",
     "example:progress": "bun run examples/progress.tsx",
@@ -21,20 +26,23 @@
     "example:mqtt:local": "AWTRIX_MQTT_LOCAL_BROKER=1 bun run examples/mqtt.tsx",
     "example:server": "bun --hot examples/server.tsx"
   },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/react": "^19.2.14",
-    "@types/react-reconciler": "^0.33.0"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "typescript": "^5"
-  },
   "dependencies": {
     "aedes": "^1.0.0",
     "arktype": "^2.2.0",
     "mqtt": "^5.15.0",
     "react": "^19.2.4",
     "react-reconciler": "^0.33.0"
+  },
+  "devDependencies": {
+    "@total-typescript/tsconfig": "^1.0.4",
+    "@types/bun": "latest",
+    "@types/react": "^19.2.14",
+    "@types/react-reconciler": "^0.33.0",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "typescript": "^5"
   }
 }

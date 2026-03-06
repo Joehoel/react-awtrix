@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  AwtrixApp,
-  AwtrixPixel,
-  AwtrixRect,
-  AwtrixText,
-  render,
-} from "../index.ts";
+import { AwtrixApp, AwtrixPixel, AwtrixRect, AwtrixText, render } from "../index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {

@@ -264,6 +264,7 @@ export interface AwtrixProtocolEventMap {
 }
 
 export interface AwtrixProtocol {
+  // oxlint-disable-next-line typescript/ban-types -- `string & {}` is an intentional pattern for autocomplete hints
   readonly kind: "http" | "mqtt" | (string & {});
   readonly key: string;
   pushApp(name: string, payload: AwtrixPayload): Promise<void>;

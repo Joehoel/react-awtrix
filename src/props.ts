@@ -157,4 +157,14 @@ export function parseAppProps(value: unknown): AppProps {
   return result;
 }
 
-export type { AppProps, BitmapProps, CircleProps, Color, EffectSettings, LineProps, PixelProps, RectProps, TextProps };
+export type {
+  AppProps,
+  BitmapProps,
+  CircleProps,
+  Color,
+  EffectSettings,
+  LineProps,
+  PixelProps,
+  RectProps,
+  TextProps,
+};

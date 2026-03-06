@@ -2,7 +2,9 @@ import { AwtrixApp, AwtrixRect, AwtrixText, render } from "../index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
-  throw new Error("Missing AWTRIX_HOST. Example: AWTRIX_HOST=192.168.1.45 bun run examples/hello.tsx");
+  throw new Error(
+    "Missing AWTRIX_HOST. Example: AWTRIX_HOST=192.168.1.45 bun run examples/hello.tsx",
+  );
 }
 
 render(

@@ -110,10 +110,10 @@ function removeFromArray(arr: ChildNode[], item: ChildNode): void {
 function insertBeforeInArray(arr: ChildNode[], item: ChildNode, before: ChildNode): void {
   removeFromArray(arr, item);
   const idx = arr.indexOf(before);
-  if (idx !== -1) {
-    arr.splice(idx, 0, item);
-  } else {
+  if (idx === -1) {
     arr.push(item);
+  } else {
+    arr.splice(idx, 0, item);
   }
 }
 
@@ -211,7 +211,7 @@ const hostConfig: ReactReconciler.HostConfig<
     if (elementType === undefined) {
       throw new Error(
         `[react-awtrix] Unknown element <${type}>. ` +
-        `Valid elements: awtrix-app, awtrix-pixel, awtrix-line, awtrix-rect, awtrix-circle, awtrix-text, awtrix-bitmap`,
+          `Valid elements: awtrix-app, awtrix-pixel, awtrix-line, awtrix-rect, awtrix-circle, awtrix-text, awtrix-bitmap`,
       );
     }
 

@@ -16,7 +16,9 @@ import { AwtrixApp, AwtrixRect, AwtrixText, render } from "react-awtrix";
 render(
   <AwtrixApp icon="87" duration={15}>
     <AwtrixRect x={0} y={0} width={32} height={8} color="#000011" filled />
-    <AwtrixText x={1} y={1} color="#FFFFFF" maxWidth={30}>Hello JSX</AwtrixText>
+    <AwtrixText x={1} y={1} color="#FFFFFF" maxWidth={30}>
+      Hello JSX
+    </AwtrixText>
   </AwtrixApp>,
   { host: "192.168.1.45", app: "jsx_demo" },
 );
@@ -37,7 +39,9 @@ import { AwtrixApp, AwtrixText, http, render } from "react-awtrix";
 
 render(
   <AwtrixApp>
-    <AwtrixText x={0} y={7} color="#FFFFFF">Hello</AwtrixText>
+    <AwtrixText x={0} y={7} color="#FFFFFF">
+      Hello
+    </AwtrixText>
   </AwtrixApp>,
   {
     app: "http-demo",
@@ -83,7 +87,9 @@ const runtime = createRuntime({
 runtime.app(
   "mqtt-demo",
   <AwtrixApp>
-    <AwtrixText x={0} y={7} color="#FFFFFF">MQTT</AwtrixText>
+    <AwtrixText x={0} y={7} color="#FFFFFF">
+      MQTT
+    </AwtrixText>
   </AwtrixApp>,
 );
 ```
