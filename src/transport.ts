@@ -160,7 +160,7 @@ export class DeviceTransport {
     const remainingDelay = this.minIntervalMs - elapsed;
 
     if (remainingDelay > 0) {
-      await Bun.sleep(remainingDelay);
+      await new Promise((resolve) => setTimeout(resolve, remainingDelay));
     }
   }
 }
