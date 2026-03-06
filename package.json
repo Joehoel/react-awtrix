@@ -9,6 +9,16 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
+  "typesVersions": {
+    "*": {
+      "jsx-runtime": [
+        "./dist/jsx-runtime.d.mts"
+      ],
+      "jsx-dev-runtime": [
+        "./dist/jsx-dev-runtime.d.mts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "import": {
@@ -41,12 +51,6 @@
       }
     },
     "./package.json": "./package.json"
-  },
-  "typesVersions": {
-    "*": {
-      "jsx-runtime": ["./dist/jsx-runtime.d.mts"],
-      "jsx-dev-runtime": ["./dist/jsx-dev-runtime.d.mts"]
-    }
   },
   "scripts": {
     "build": "tsdown",
