@@ -1,9 +1,11 @@
 pre-commit:
   parallel: true
   jobs:
-    - name: lint-fix
-      run: bun run lint:fix {staged_files}
+    - name: lint
+      glob: "*.{ts,tsx}"
+      run: bunx oxlint --fix {staged_files}
       stage_fixed: true
     - name: format
-      run: bun run format {staged_files}
+      glob: "*.{ts,tsx,json,md}"
+      run: bunx oxfmt --write {staged_files}
       stage_fixed: true
