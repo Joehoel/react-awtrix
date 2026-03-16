@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { AwtrixApp, AwtrixText } from "../components.tsx";
+import { App, Text } from "../components.tsx";
 import { notify } from "../renderer.ts";
 import { createRenderTestContext, type RenderTestContext } from "../test/render-test.ts";
 
@@ -17,11 +17,11 @@ describe("notify", () => {
     context = createRenderTestContext({ timeoutMs: 1500 });
 
     await context.notifyWithDevice(
-      <AwtrixApp text="Notification">
-        <AwtrixText x={0} y={7} color="#FFFFFF">
+      <App text="Notification">
+        <Text x={0} y={7} color="#FFFFFF">
           Hi
-        </AwtrixText>
-      </AwtrixApp>,
+        </Text>
+      </App>,
       {
         hold: true,
         sound: "ding",
@@ -50,11 +50,11 @@ describe("notify", () => {
     context.device.stop();
 
     const failedNotify = notify(
-      <AwtrixApp text="Should fail">
-        <AwtrixText x={0} y={7} color="white">
+      <App text="Should fail">
+        <Text x={0} y={7} color="white">
           Fail
-        </AwtrixText>
-      </AwtrixApp>,
+        </Text>
+      </App>,
       {
         host,
         port,

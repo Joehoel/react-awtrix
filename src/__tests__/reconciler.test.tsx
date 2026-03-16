@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { useEffect, useMemo, useState } from "react";
 import {
-  AwtrixApp,
-  AwtrixBitmap,
-  AwtrixCircle,
-  AwtrixLine,
-  AwtrixPixel,
-  AwtrixRect,
-  AwtrixText,
+  App,
+  Bitmap,
+  Circle,
+  Line,
+  Pixel,
+  Rect,
+  Text,
 } from "../components.tsx";
 import { createRenderTestContext, type RenderTestContext } from "../test/render-test.ts";
 
@@ -25,9 +25,9 @@ describe("reconciler integration", () => {
     context = createRenderTestContext({ app: "initial-render", debounce: 0, timeoutMs: 1500 });
 
     context.renderApp(
-      <AwtrixApp>
-        <AwtrixPixel x={2} y={3} color="#00FF00" />
-      </AwtrixApp>,
+      <App>
+        <Pixel x={2} y={3} color="#00FF00" />
+      </App>,
     );
 
     const payload = await context.waitForAppPayload();
@@ -51,9 +51,9 @@ describe("reconciler integration", () => {
       }, []);
 
       return (
-        <AwtrixApp>
-          <AwtrixPixel x={x} y={0} color="red" />
-        </AwtrixApp>
+        <App>
+          <Pixel x={x} y={0} color="red" />
+        </App>
       );
     }
 
@@ -69,11 +69,11 @@ describe("reconciler integration", () => {
     context = createRenderTestContext({ app: "unmount-app", debounce: 0, timeoutMs: 1500 });
 
     const handle = context.renderApp(
-      <AwtrixApp>
-        <AwtrixText x={0} y={7} color="#FFFFFF">
+      <App>
+        <Text x={0} y={7} color="#FFFFFF">
           Mounted
-        </AwtrixText>
-      </AwtrixApp>,
+        </Text>
+      </App>,
     );
 
     await context.waitForAppPayload();
@@ -107,11 +107,11 @@ describe("reconciler integration", () => {
       }, []);
 
       return (
-        <AwtrixApp>
-          <AwtrixText x={0} y={7} color="#FFFFFF">
+        <App>
+          <Text x={0} y={7} color="#FFFFFF">
             {value}
-          </AwtrixText>
-        </AwtrixApp>
+          </Text>
+        </App>
       );
     }
 
@@ -143,11 +143,11 @@ describe("reconciler integration", () => {
       }, []);
 
       return (
-        <AwtrixApp>
-          <AwtrixText x={0} y={7} color="#FFFFFF">
+        <App>
+          <Text x={0} y={7} color="#FFFFFF">
             {`00:00:0${tick}`}
-          </AwtrixText>
-        </AwtrixApp>
+          </Text>
+        </App>
       );
     }
 
@@ -192,13 +192,13 @@ describe("reconciler integration", () => {
       const headline = mode === "boot" ? "BOOT" : `LIVE-${frame}`;
 
       return (
-        <AwtrixApp duration={8} background="#020611" overlay="rain">
-          <AwtrixRect x={0} y={0} width={32} height={8} color="#020611" filled />
-          <AwtrixLine x1={0} y1={0} x2={31} y2={0} color="#1E90FF" />
-          <AwtrixCircle x={23} y={3} radius={2} color="#FFAA00" filled={mode === "live"} />
+        <App duration={8} background="#020611" overlay="rain">
+          <Rect x={0} y={0} width={32} height={8} color="#020611" filled />
+          <Line x1={0} y1={0} x2={31} y2={0} color="#1E90FF" />
+          <Circle x={23} y={3} radius={2} color="#FFAA00" filled={mode === "live"} />
 
           {bars.map((height, barIndex) => (
-            <AwtrixRect
+            <Rect
               // oxlint-disable-next-line react/no-array-index-key -- position-dependent bars where index is the identity
               key={`bar-x${barIndex * 2}`}
               x={barIndex * 2}
@@ -210,12 +210,12 @@ describe("reconciler integration", () => {
             />
           ))}
 
-          <AwtrixPixel x={(frame * 3) % 32} y={7} color={pulseColor} />
-          <AwtrixBitmap x={26} y={0} width={2} height={2} data={iconData} />
-          <AwtrixText x={10} y={0} color="#FFFFFF" maxWidth={20} charWidth={4}>
+          <Pixel x={(frame * 3) % 32} y={7} color={pulseColor} />
+          <Bitmap x={26} y={0} width={2} height={2} data={iconData} />
+          <Text x={10} y={0} color="#FFFFFF" maxWidth={20} charWidth={4}>
             {headline}
-          </AwtrixText>
-        </AwtrixApp>
+          </Text>
+        </App>
       );
     }
 

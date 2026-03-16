@@ -1,11 +1,11 @@
 export {
-  AwtrixApp,
-  AwtrixBitmap,
-  AwtrixCircle,
-  AwtrixLine,
-  AwtrixPixel,
-  AwtrixRect,
-  AwtrixText,
+  App,
+  Bitmap,
+  Circle,
+  Line,
+  Pixel,
+  Rect,
+  Text,
 } from "./components.tsx";
 export { http } from "./protocols/http.ts";
 export { mqtt } from "./protocols/mqtt.ts";
@@ -32,4 +32,4 @@ export type {
   TextProps,
 } from "./types.ts";
 
-export type { AwtrixAppComponentProps, AwtrixTextComponentProps } from "./components.tsx";
+export type { AppComponentProps, TextComponentProps } from "./components.tsx";

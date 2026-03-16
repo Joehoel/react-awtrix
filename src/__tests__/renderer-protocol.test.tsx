@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { AwtrixApp, AwtrixText } from "../components.tsx";
+import { App, Text } from "../components.tsx";
 import { notify, render } from "../renderer.ts";
 import type { AwtrixPayload, AwtrixProtocol } from "../types.ts";
 
@@ -33,11 +33,11 @@ describe("renderer protocol options", () => {
     };
 
     const handle = render(
-      <AwtrixApp>
-        <AwtrixText x={0} y={7} color="#FFFFFF">
+      <App>
+        <Text x={0} y={7} color="#FFFFFF">
           Hi
-        </AwtrixText>
-      </AwtrixApp>,
+        </Text>
+      </App>,
       {
         app: "proto-render",
         protocol,
@@ -72,11 +72,11 @@ describe("renderer protocol options", () => {
     };
 
     await notify(
-      <AwtrixApp text="Alert">
-        <AwtrixText x={0} y={7} color="#FFFFFF">
+      <App text="Alert">
+        <Text x={0} y={7} color="#FFFFFF">
           Yo
-        </AwtrixText>
-      </AwtrixApp>,
+        </Text>
+      </App>,
       { protocol },
     );
 

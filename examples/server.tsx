@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AwtrixApp, AwtrixPixel, AwtrixRect, AwtrixText, createRuntime } from "../src/index.ts";
+import { App, Pixel, Rect, Text, createRuntime } from "../src/index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
@@ -28,12 +28,12 @@ function ClockApp() {
   }, []);
 
   return (
-    <AwtrixApp icon="66" duration={10} background="#06141F" center>
-      <AwtrixRect x={0} y={0} width={32} height={8} color="#06141F" filled />
-      <AwtrixText x={0} y={1} color="#8FE3FF">
+    <App icon="66" duration={10} background="#06141F" center>
+      <Rect x={0} y={0} width={32} height={8} color="#06141F" filled />
+      <Text x={0} y={1} color="#8FE3FF">
         {formatClock(now)}
-      </AwtrixText>
-    </AwtrixApp>
+      </Text>
+    </App>
   );
 }
 
@@ -51,29 +51,29 @@ function PulseApp() {
   }, []);
 
   return (
-    <AwtrixApp icon="87" duration={8} background="#110A1F" noScroll>
-      <AwtrixRect x={0} y={0} width={32} height={8} color="#110A1F" filled />
-      <AwtrixRect x={0} y={6} width={32} height={1} color="#2F2447" filled />
-      <AwtrixRect x={0} y={6} width={tick + 1} height={1} color="#FF7B54" filled />
-      <AwtrixPixel x={tick} y={5} color="#FFD166" />
-      <AwtrixText x={0} y={0} color="#FFFFFF">
+    <App icon="87" duration={8} background="#110A1F" noScroll>
+      <Rect x={0} y={0} width={32} height={8} color="#110A1F" filled />
+      <Rect x={0} y={6} width={32} height={1} color="#2F2447" filled />
+      <Rect x={0} y={6} width={tick + 1} height={1} color="#FF7B54" filled />
+      <Pixel x={tick} y={5} color="#FFD166" />
+      <Text x={0} y={0} color="#FFFFFF">
         PULSE!
-      </AwtrixText>
-    </AwtrixApp>
+      </Text>
+    </App>
   );
 }
 
 function StatusApp() {
   return (
-    <AwtrixApp icon="182" duration={12} background="#04180E" noScroll>
-      <AwtrixRect x={0} y={0} width={32} height={8} color="#04180E" filled />
-      <AwtrixText x={0} y={0} color="#9CFFB6">
+    <App icon="182" duration={12} background="#04180E" noScroll>
+      <Rect x={0} y={0} width={32} height={8} color="#04180E" filled />
+      <Text x={0} y={0} color="#9CFFB6">
         SERVER
-      </AwtrixText>
-      <AwtrixText x={0} y={4} color="#FFFFFF">
+      </Text>
+      <Text x={0} y={4} color="#FFFFFF">
         MULTI APP
-      </AwtrixText>
-    </AwtrixApp>
+      </Text>
+    </App>
   );
 }
 

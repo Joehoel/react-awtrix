@@ -1,7 +1,7 @@
 import { createServer } from "node:net";
 import { networkInterfaces } from "node:os";
 import { Aedes } from "aedes";
-import { AwtrixApp, AwtrixText, createRuntime, mqtt } from "../src/index.ts";
+import { App, Text, createRuntime, mqtt } from "../src/index.ts";
 
 const prefix = process.env.AWTRIX_MQTT_PREFIX ?? "awtrix_demo";
 const localBrokerEnabled = process.env.AWTRIX_MQTT_LOCAL_BROKER === "1";
@@ -139,11 +139,11 @@ const runtime = createRuntime({
 
 runtime.app(
   "mqtt-hello",
-  <AwtrixApp>
-    <AwtrixText x={0} y={7} color="#FFFFFF">
+  <App>
+    <Text x={0} y={7} color="#FFFFFF">
       MQTT
-    </AwtrixText>
-  </AwtrixApp>,
+    </Text>
+  </App>,
 );
 
 let shuttingDown = false;

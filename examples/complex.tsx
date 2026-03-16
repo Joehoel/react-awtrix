@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  AwtrixApp,
-  AwtrixBitmap,
-  AwtrixCircle,
-  AwtrixLine,
-  AwtrixPixel,
-  AwtrixRect,
-  AwtrixText,
+  App,
+  Bitmap,
+  Circle,
+  Line,
+  Pixel,
+  Rect,
+  Text,
   render,
 } from "../src/index.ts";
 
@@ -65,7 +65,7 @@ function ComplexApp() {
   const accent = alert ? "#FF4136" : "#2ECC71";
 
   return (
-    <AwtrixApp
+    <App
       duration={8}
       background="#06080F"
       overlay={alert ? "storm" : "rain"}
@@ -75,11 +75,11 @@ function ComplexApp() {
       noScroll
       center={false}
     >
-      <AwtrixRect x={0} y={0} width={32} height={8} color="#06080F" filled />
-      <AwtrixLine x1={0} y1={7} x2={31} y2={7} color="#1F2933" />
+      <Rect x={0} y={0} width={32} height={8} color="#06080F" filled />
+      <Line x1={0} y1={7} x2={31} y2={7} color="#1F2933" />
 
       {series.map((height, barIndex) => (
-        <AwtrixRect
+        <Rect
           // oxlint-disable-next-line react/no-array-index-key -- position-dependent bars where index is the identity
           key={`bar-x${barIndex * 2}`}
           x={barIndex * 2}
@@ -91,18 +91,18 @@ function ComplexApp() {
         />
       ))}
 
-      <AwtrixCircle x={29} y={1} radius={1} color={accent} filled />
-      <AwtrixBitmap x={24} y={0} width={2} height={2} data={spinner} />
-      <AwtrixPixel x={(tick * 2) % 32} y={6} color={accent} />
+      <Circle x={29} y={1} radius={1} color={accent} filled />
+      <Bitmap x={24} y={0} width={2} height={2} data={spinner} />
+      <Pixel x={(tick * 2) % 32} y={6} color={accent} />
 
-      <AwtrixText x={0} y={0} color="#FFFFFF" maxWidth={20} charWidth={4}>
+      <Text x={0} y={0} color="#FFFFFF" maxWidth={20} charWidth={4}>
         {`CPU ${progress}%`}
-      </AwtrixText>
+      </Text>
 
-      <AwtrixText x={0} y={3} color="#7FDBFF" maxWidth={20} charWidth={4}>
+      <Text x={0} y={3} color="#7FDBFF" maxWidth={20} charWidth={4}>
         {statusText}
-      </AwtrixText>
-    </AwtrixApp>
+      </Text>
+    </App>
   );
 }
 

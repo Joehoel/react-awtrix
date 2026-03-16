@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { AwtrixApp, AwtrixText } from "../components.tsx";
+import { App, Text } from "../components.tsx";
 import { mqtt, type MqttClientLike, type MqttProtocolDependencies } from "../protocols/mqtt.ts";
 import { createRuntime } from "../runtime.ts";
 import { createVirtualAwtrixDevice, type VirtualAwtrixDevice } from "../test/virtual-device.ts";
@@ -29,11 +29,11 @@ function createContext(): RuntimeTestContext {
 
 function appWithText(text: string) {
   return (
-    <AwtrixApp>
-      <AwtrixText x={0} y={0} color="#FFFFFF">
+    <App>
+      <Text x={0} y={0} color="#FFFFFF">
         {text}
-      </AwtrixText>
-    </AwtrixApp>
+      </Text>
+    </App>
   );
 }
 

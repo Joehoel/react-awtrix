@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AwtrixApp, AwtrixPixel, AwtrixRect, AwtrixText, render } from "../src/index.ts";
+import { App, Pixel, Rect, Text, render } from "../src/index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
@@ -77,7 +77,7 @@ function PomodoroApp() {
   const line = `${phaseLabel}${cycleDigit} ${formatDuration(state.remainingSeconds)}`;
 
   return (
-    <AwtrixApp
+    <App
       icon="66"
       duration={100}
       background="#071019"
@@ -87,12 +87,12 @@ function PomodoroApp() {
       progressC={phaseColor}
       progressBC="#223140"
     >
-      <AwtrixRect x={0} y={0} width={32} height={8} color="#071019" filled />
-      <AwtrixPixel x={31} y={0} color={phaseColor} />
-      <AwtrixText x={0} y={1} color="#FFFFFF" maxWidth={32} charWidth={4}>
+      <Rect x={0} y={0} width={32} height={8} color="#071019" filled />
+      <Pixel x={31} y={0} color={phaseColor} />
+      <Text x={0} y={1} color="#FFFFFF" maxWidth={32} charWidth={4}>
         {line}
-      </AwtrixText>
-    </AwtrixApp>
+      </Text>
+    </App>
   );
 }
 
