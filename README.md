@@ -3,15 +3,15 @@
 A React renderer for [Awtrix 3](https://github.com/Blueforcer/awtrix3) LED matrix displays. Write JSX, see pixels.
 
 ```tsx
-import { AwtrixApp, AwtrixRect, AwtrixText, render } from "react-awtrix";
+import { App, Rect, Text, render } from "react-awtrix";
 
 render(
-  <AwtrixApp icon="87" duration={15}>
-    <AwtrixRect x={0} y={0} width={32} height={8} color="#0D1117" filled />
-    <AwtrixText x={7} y={1} color="#58A6FF">
+  <App icon="87" duration={15}>
+    <Rect x={0} y={0} width={32} height={8} color="#0D1117" filled />
+    <Text x={7} y={1} color="#58A6FF">
       Hello
-    </AwtrixText>
-  </AwtrixApp>,
+    </Text>
+  </App>,
   { host: "192.168.1.45", app: "greeting" },
 );
 ```
@@ -43,7 +43,7 @@ Set the `AWTRIX_HOST` environment variable to your device IP, then:
 
 ```tsx
 import { useState, useEffect } from "react";
-import { AwtrixApp, AwtrixRect, AwtrixText, render } from "react-awtrix";
+import { App, Rect, Text, render } from "react-awtrix";
 
 function Clock() {
   const [now, setNow] = useState(new Date());
@@ -60,12 +60,12 @@ function Clock() {
   });
 
   return (
-    <AwtrixApp icon="66" duration={10}>
-      <AwtrixRect x={0} y={0} width={32} height={8} color="#000814" filled />
-      <AwtrixText x={7} y={1} color="#E0E0E0">
+    <App icon="66" duration={10}>
+      <Rect x={0} y={0} width={32} height={8} color="#000814" filled />
+      <Text x={7} y={1} color="#E0E0E0">
         {time}
-      </AwtrixText>
-    </AwtrixApp>
+      </Text>
+    </App>
   );
 }
 
@@ -81,12 +81,12 @@ process.on("SIGINT", () => handle.unmount());
 
 All drawing happens on a 32x8 pixel matrix (configurable). Coordinates start at (0, 0) in the top-left corner.
 
-### `<AwtrixApp>`
+### `<App>`
 
 Top-level container that sets app-level options. Every render tree should have one.
 
 ```tsx
-<AwtrixApp
+<App
   icon="87"
   duration={15}
   background="#0D1117"
@@ -100,7 +100,7 @@ Top-level container that sets app-level options. Every render tree should have o
   center
 >
   {children}
-</AwtrixApp>
+</App>
 ```
 
 | Prop             | Type          | Description                                                                                       |
@@ -134,12 +134,12 @@ Top-level container that sets app-level options. Every render tree should have o
 
 All drawing components accept colors as hex strings (`"#FF0000"`) or RGB tuples (`[255, 0, 0]`).
 
-#### `<AwtrixText>`
+#### `<Text>`
 
 ```tsx
-<AwtrixText x={0} y={1} color="#FFFFFF" maxWidth={24}>
+<Text x={0} y={1} color="#FFFFFF" maxWidth={24}>
   Score: {score}
-</AwtrixText>
+</Text>
 ```
 
 | Prop        | Type               | Description                                           |
@@ -151,10 +151,10 @@ All drawing components accept colors as hex strings (`"#FF0000"`) or RGB tuples 
 | `charWidth` | `number`           | Character width for clipping calculation (default: 4) |
 | `children`  | `string \| number` | Text content                                          |
 
-#### `<AwtrixRect>`
+#### `<Rect>`
 
 ```tsx
-<AwtrixRect x={0} y={0} width={32} height={8} color="#1A1A2E" filled />
+<Rect x={0} y={0} width={32} height={8} color="#1A1A2E" filled />
 ```
 
 | Prop              | Type      | Description        |
@@ -164,10 +164,10 @@ All drawing components accept colors as hex strings (`"#FF0000"`) or RGB tuples 
 | `color`           | `Color`   | Stroke/fill color  |
 | `filled`          | `boolean` | Fill the rectangle |
 
-#### `<AwtrixPixel>`
+#### `<Pixel>`
 
 ```tsx
-<AwtrixPixel x={15} y={3} color="#FF6B6B" />
+<Pixel x={15} y={3} color="#FF6B6B" />
 ```
 
 | Prop     | Type     | Description |
@@ -175,10 +175,10 @@ All drawing components accept colors as hex strings (`"#FF0000"`) or RGB tuples 
 | `x`, `y` | `number` | Position    |
 | `color`  | `Color`  | Pixel color |
 
-#### `<AwtrixLine>`
+#### `<Line>`
 
 ```tsx
-<AwtrixLine x1={0} y1={0} x2={31} y2={7} color="#4ECDC4" />
+<Line x1={0} y1={0} x2={31} y2={7} color="#4ECDC4" />
 ```
 
 | Prop       | Type     | Description |
@@ -187,10 +187,10 @@ All drawing components accept colors as hex strings (`"#FF0000"`) or RGB tuples 
 | `x2`, `y2` | `number` | End point   |
 | `color`    | `Color`  | Line color  |
 
-#### `<AwtrixCircle>`
+#### `<Circle>`
 
 ```tsx
-<AwtrixCircle x={16} y={4} radius={3} color="#FFE66D" filled />
+<Circle x={16} y={4} radius={3} color="#FFE66D" filled />
 ```
 
 | Prop     | Type      | Description       |
@@ -200,10 +200,10 @@ All drawing components accept colors as hex strings (`"#FF0000"`) or RGB tuples 
 | `color`  | `Color`   | Stroke/fill color |
 | `filled` | `boolean` | Fill the circle   |
 
-#### `<AwtrixBitmap>`
+#### `<Bitmap>`
 
 ```tsx
-<AwtrixBitmap x={0} y={0} width={2} height={2} data={[0xff0000, 0x00ff00, 0x0000ff, 0xffff00]} />
+<Bitmap x={0} y={0} width={2} height={2} data={[0xff0000, 0x00ff00, 0x0000ff, 0xffff00]} />
 ```
 
 | Prop              | Type       | Description                        |
@@ -242,11 +242,11 @@ Renders a React tree as a notification. Resolves when sent.
 import { notify } from "react-awtrix";
 
 await notify(
-  <AwtrixApp icon="alert">
-    <AwtrixText x={7} y={1} color="#FF0000">
+  <App icon="alert">
+    <Text x={7} y={1} color="#FF0000">
       ALERT
-    </AwtrixText>
-  </AwtrixApp>,
+    </Text>
+  </App>,
   {
     host: "192.168.1.45",
     hold: true, // keep notification until dismissed
@@ -262,7 +262,7 @@ await notify(
 For applications that manage multiple apps on one device, `createRuntime()` provides a shared transport with automatic cleanup.
 
 ```tsx
-import { AwtrixApp, AwtrixText, createRuntime } from "react-awtrix";
+import { App, Text, createRuntime } from "react-awtrix";
 
 const runtime = createRuntime({
   host: process.env.AWTRIX_HOST!,
@@ -271,20 +271,20 @@ const runtime = createRuntime({
 
 runtime.app(
   "clock",
-  <AwtrixApp icon="66">
-    <AwtrixText x={7} y={1} color="#E0E0E0">
+  <App icon="66">
+    <Text x={7} y={1} color="#E0E0E0">
       12:00
-    </AwtrixText>
-  </AwtrixApp>,
+    </Text>
+  </App>,
 );
 
 runtime.app(
   "status",
-  <AwtrixApp>
-    <AwtrixText x={1} y={1} color="#2ECC71">
+  <App>
+    <Text x={1} y={1} color="#2ECC71">
       OK
-    </AwtrixText>
-  </AwtrixApp>,
+    </Text>
+  </App>,
 );
 
 // Update an app by calling runtime.app() again with the same name
