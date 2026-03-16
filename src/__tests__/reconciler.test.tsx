@@ -1,14 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { useEffect, useMemo, useState } from "react";
-import {
-  App,
-  Bitmap,
-  Circle,
-  Line,
-  Pixel,
-  Rect,
-  Text,
-} from "../components.tsx";
+import { App, Bitmap, Circle, Line, Pixel, Rect, Text } from "../components.tsx";
 import { createRenderTestContext, type RenderTestContext } from "../test/render-test.ts";
 
 describe("reconciler integration", () => {

@@ -1,12 +1,4 @@
-export {
-  App,
-  Bitmap,
-  Circle,
-  Line,
-  Pixel,
-  Rect,
-  Text,
-} from "./components.tsx";
+export { App, Bitmap, Circle, Line, Pixel, Rect, Text } from "./components.tsx";
 export { http } from "./protocols/http.ts";
 export { mqtt } from "./protocols/mqtt.ts";
 export { createRuntime } from "./runtime.ts";

@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  App,
-  Bitmap,
-  Circle,
-  Line,
-  Pixel,
-  Rect,
-  Text,
-  render,
-} from "../src/index.ts";
+import { App, Bitmap, Circle, Line, Pixel, Rect, Text, render } from "../src/index.ts";
 
 const host = process.env.AWTRIX_HOST;
 if (host === undefined) {
