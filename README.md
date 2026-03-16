@@ -404,6 +404,7 @@ export AWTRIX_HOST=192.168.1.45
 
 ```bash
 bun install          # install dependencies
+bun run prepare      # install git hooks
 bun test             # run tests (58 tests)
 bun run typecheck    # type check
 bun run lint         # lint with oxlint
@@ -412,6 +413,8 @@ bun run knip         # detect unused code
 bun run check        # all of the above
 bun run build        # build with tsdown
 ```
+
+Pre-commit hooks are managed with Lefthook. On commit, it runs oxlint and oxfmt only for staged files and re-stages any fixes automatically.
 
 ## Architecture
 
