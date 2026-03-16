@@ -54,6 +54,7 @@
   },
   "scripts": {
     "build": "tsdown",
+    "prepare": "lefthook install",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
@@ -85,6 +86,7 @@
     "@types/react": "^19.2.14",
     "@types/react-reconciler": "^0.33.0",
     "knip": "^5.85.0",
+    "lefthook": "^1.7.0",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
     "publint": "^0.3.18",
