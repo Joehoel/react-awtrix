@@ -88,7 +88,8 @@
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
     "publint": "^0.3.18",
-    "tsdown": "^0.21.0"
+    "tsdown": "^0.21.0",
+    "lefthook": "^1.7.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
