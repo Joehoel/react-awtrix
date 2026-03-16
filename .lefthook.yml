@@ -1,0 +1,8 @@
+commit:
+  commands:
+    lint-fix:
+      glob: "src/**/*.{ts,tsx}"
+      run: bun run lint:fix
+    format:
+      glob: "**/*.{ts,tsx,json,yml}"
+      run: bun run format
