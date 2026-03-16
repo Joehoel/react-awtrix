@@ -54,6 +54,7 @@
   },
   "scripts": {
     "build": "tsdown",
+    "prepare": "lefthook install",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
