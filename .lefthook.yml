@@ -1,11 +1,14 @@
 pre-commit:
   parallel: true
   jobs:
-    - name: lint-fix
-      files: git diff --name-only --cached --diff-filter=ACMR | grep -E '^src/.*\.(ts|tsx)$' || true
-      run: bunx oxlint --fix {files}
+    - name: lint-fix-ts
+      glob: "src/**/*.ts"
+      run: bunx oxlint --fix {staged_files}
+      stage_fixed: true
+    - name: lint-fix-tsx
+      glob: "src/**/*.tsx"
+      run: bunx oxlint --fix {staged_files}
       stage_fixed: true
     - name: format
-      files: git diff --name-only --cached --diff-filter=ACMR | grep -E '\.(ts|tsx|json|yml)$' || true
-      run: bunx oxfmt --write {files}
+      run: bunx oxfmt --write {staged_files}
       stage_fixed: true
