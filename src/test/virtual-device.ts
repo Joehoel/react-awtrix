@@ -1017,6 +1017,11 @@ export class VirtualAwtrixDevice {
       return jsonResponse(this.screen, 200);
     }
 
+    // DELETE method for custom app deletion
+    if (path === "/api/custom" && request.method === "DELETE") {
+      return this.handleCustomDeleteRequest(requestUrl);
+    }
+
     if (request.method !== "POST") {
       this.flushWaiters();
       return textResponse("Method Not Allowed", 405);
@@ -1094,10 +1099,19 @@ export class VirtualAwtrixDevice {
     return textResponse("Not Found", 404);
   };
 
+  private handleCustomDeleteRequest(requestUrl: URL): Response {
+    const name = requestUrl.searchParams.get("name") ?? "";
+    this.deleteCustomAppsByPrefix(name);
+    this.customRequests.push({ name, deleted: true });
+    this.flushWaiters();
+    return textResponse("OK", 200);
+  }
+
   private async handleCustomRequest(request: Request, requestUrl: URL): Promise<Response> {
     const name = requestUrl.searchParams.get("name") ?? "";
     const bodyText = await request.text();
 
+    // POST with empty body still works for deletion (backwards compatibility)
     if (bodyText.length === 0 || bodyText === "{}") {
       this.deleteCustomAppsByPrefix(name);
       this.customRequests.push({ name, deleted: true });

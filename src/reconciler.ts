@@ -1,4 +1,5 @@
 import ReactReconciler from "react-reconciler";
+import { ConcurrentRoot } from "react-reconciler/constants.js";
 import {
   parseAppProps,
   parseBitmapProps,
@@ -17,6 +18,20 @@ import type {
   ElementType,
 } from "./types.ts";
 import { resolveElementType } from "./types.ts";
+
+// ─── Parser registry ───────────────────────────────────────────────────────
+
+type PropsParser = (props: unknown) => AwtrixInstance["props"];
+
+const parsers: Record<ElementType, PropsParser> = {
+  pixel: parsePixelProps,
+  line: parseLineProps,
+  rect: parseRectProps,
+  circle: parseCircleProps,
+  text: parseTextProps,
+  bitmap: parseBitmapProps,
+  app: parseAppProps,
+};
 
 // ─── Event priority constants (React internals) ───────────────────────────
 
@@ -120,65 +135,13 @@ function insertBeforeInArray(arr: ChildNode[], item: ChildNode, before: ChildNod
 // ─── Reconciler host config ────────────────────────────────────────────────
 
 function createAwtrixInstance(type: ElementType, props: unknown): AwtrixInstance {
-  if (type === "pixel") {
-    return { type: "pixel", props: parsePixelProps(props), children: [], hidden: false };
-  }
-
-  if (type === "line") {
-    return { type: "line", props: parseLineProps(props), children: [], hidden: false };
-  }
-
-  if (type === "rect") {
-    return { type: "rect", props: parseRectProps(props), children: [], hidden: false };
-  }
-
-  if (type === "circle") {
-    return { type: "circle", props: parseCircleProps(props), children: [], hidden: false };
-  }
-
-  if (type === "text") {
-    return { type: "text", props: parseTextProps(props), children: [], hidden: false };
-  }
-
-  if (type === "bitmap") {
-    return { type: "bitmap", props: parseBitmapProps(props), children: [], hidden: false };
-  }
-
-  return { type: "app", props: parseAppProps(props), children: [], hidden: false };
+  const parser = parsers[type];
+  return { type, props: parser(props), children: [], hidden: false } as AwtrixInstance;
 }
 
 function updateAwtrixInstance(instance: AwtrixInstance, nextProps: unknown): void {
-  if (instance.type === "pixel") {
-    instance.props = parsePixelProps(nextProps);
-    return;
-  }
-
-  if (instance.type === "line") {
-    instance.props = parseLineProps(nextProps);
-    return;
-  }
-
-  if (instance.type === "rect") {
-    instance.props = parseRectProps(nextProps);
-    return;
-  }
-
-  if (instance.type === "circle") {
-    instance.props = parseCircleProps(nextProps);
-    return;
-  }
-
-  if (instance.type === "text") {
-    instance.props = parseTextProps(nextProps);
-    return;
-  }
-
-  if (instance.type === "bitmap") {
-    instance.props = parseBitmapProps(nextProps);
-    return;
-  }
-
-  instance.props = parseAppProps(nextProps);
+  const parser = parsers[instance.type];
+  (instance as { props: unknown }).props = parser(nextProps);
 }
 
 const hostConfig: ReactReconciler.HostConfig<
@@ -416,3 +379,26 @@ const hostConfig: ReactReconciler.HostConfig<
 // ─── Create the reconciler ─────────────────────────────────────────────────
 
 export const reconciler = ReactReconciler(hostConfig);
+
+// ─── Root creation helper ──────────────────────────────────────────────────
+
+type ReconcilerRoot = ReturnType<typeof reconciler.createContainer>;
+
+export function createReconcilerRoot(
+  container: AwtrixContainer,
+  tag: string,
+  onUncaughtError?: (error: unknown) => void,
+): ReconcilerRoot {
+  return reconciler.createContainer(
+    container,
+    ConcurrentRoot,
+    null, // hydration callbacks
+    false, // isStrictMode
+    null, // concurrentUpdatesByDefaultOverride
+    tag, // identifierPrefix
+    onUncaughtError ?? ((err) => console.error("[react-awtrix] Uncaught:", err)),
+    (err) => console.error("[react-awtrix] Caught:", err),
+    (err) => console.error("[react-awtrix] Recoverable:", err),
+    () => {}, // onDefaultTransitionIndicator
+  );
+}

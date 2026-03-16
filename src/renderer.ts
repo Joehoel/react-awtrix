@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { ConcurrentRoot } from "react-reconciler/constants.js";
 import { resolveProtocol } from "./protocols/resolve.ts";
-import { reconciler } from "./reconciler.ts";
+import { createReconcilerRoot, reconciler } from "./reconciler.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import type {
   AwtrixAppContainer,
@@ -96,18 +95,7 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
     },
   };
 
-  const root = reconciler.createContainer(
-    container,
-    ConcurrentRoot, // tag
-    null, // hydration callbacks
-    false, // isStrictMode
-    null, // concurrentUpdatesByDefaultOverride
-    "awtrix", // identifierPrefix
-    (err) => console.error("[react-awtrix] Uncaught:", err),
-    (err) => console.error("[react-awtrix] Caught:", err),
-    (err) => console.error("[react-awtrix] Recoverable:", err),
-    () => {}, // onDefaultTransitionIndicator
-  );
+  const root = createReconcilerRoot(container, "awtrix");
 
   reconciler.updateContainer(element, root, null, null);
 
@@ -149,8 +137,11 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
  * );
  * ```
  */
+const DEFAULT_NOTIFY_TIMEOUT = 5000;
+
 export function notify(element: ReactNode, options: NotifyOptions): Promise<void> {
   const protocol = resolveProtocol(options);
+  const timeoutMs = options.timeout ?? DEFAULT_NOTIFY_TIMEOUT;
 
   const notifyPayloadOptions: NotifyPayloadOptions = {
     hold: options.hold,
@@ -160,6 +151,17 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
   };
 
   return new Promise((resolve, reject) => {
+    let completed = false;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    let root: ReturnType<typeof createReconcilerRoot> | undefined;
+
+    const cleanup = (): void => {
+      if (timeoutHandle !== undefined) {
+        clearTimeout(timeoutHandle);
+        timeoutHandle = undefined;
+      }
+    };
+
     const container: AwtrixNotifyContainer = {
       appName: "__notify",
       mode: "notify",
@@ -169,8 +171,16 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
       children: [],
       debug: options.debug ?? false,
       debounceMs: 0, // notifications flush immediately
-      onFlush: resolve,
+      onFlush() {
+        if (completed) return;
+        completed = true;
+        cleanup();
+        resolve();
+      },
       onFlushError(error) {
+        if (completed) return;
+        completed = true;
+        cleanup();
         reject(error);
       },
       requestFlush: async (payload) => {
@@ -178,21 +188,36 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
       },
     };
 
-    const root = reconciler.createContainer(
-      container,
-      ConcurrentRoot,
-      null,
-      false,
-      null,
-      "awtrix-notify",
-      (err) => {
-        console.error("[react-awtrix] Uncaught:", err);
+    root = createReconcilerRoot(container, "awtrix-notify", (err) => {
+      console.error("[react-awtrix] Uncaught:", err);
+      if (!completed) {
+        completed = true;
+        cleanup();
         reject(err);
-      },
-      (err) => console.error("[react-awtrix] Caught:", err),
-      (err) => console.error("[react-awtrix] Recoverable:", err),
-      () => {},
-    );
+      }
+    });
+
+    timeoutHandle = setTimeout(() => {
+      if (completed) return;
+      completed = true;
+
+      // Clean up the React root
+      if (root !== undefined) {
+        reconciler.updateContainer(null, root, null, null);
+      }
+
+      // Cancel any pending flush
+      if (container.pendingFlush !== undefined) {
+        clearTimeout(container.pendingFlush);
+        container.pendingFlush = undefined;
+      }
+
+      reject(
+        new Error(
+          `[react-awtrix] notify() timed out after ${timeoutMs}ms — did the component render anything?`,
+        ),
+      );
+    }, timeoutMs);
 
     reconciler.updateContainer(element, root, null, null);
   });

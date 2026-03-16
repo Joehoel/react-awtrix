@@ -203,6 +203,8 @@ export type NotifyOptions = ConnectionOptions & {
   debug?: boolean;
   width?: number;
   height?: number;
+  /** Timeout in ms before notify() rejects if nothing renders. Default: 5000 */
+  timeout?: number;
 };
 
 export interface NotifyPayloadOptions {
