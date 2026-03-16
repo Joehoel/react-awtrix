@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { ConcurrentRoot } from "react-reconciler/constants.js";
 import { resolveProtocol } from "./protocols/resolve.ts";
-import { reconciler } from "./reconciler.ts";
+import { createReconcilerRoot, reconciler } from "./reconciler.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import { DeviceTransport } from "./transport.ts";
 import type {
@@ -393,17 +392,8 @@ class AwtrixRuntimeImpl implements Runtime {
   }
 
   private createRoot(name: string, container: AwtrixContainer): RuntimeRoot {
-    return reconciler.createContainer(
-      container,
-      ConcurrentRoot,
-      null,
-      false,
-      null,
-      `awtrix-runtime-${name}`,
-      (error) => this.reportError(name, error),
-      (error) => this.reportError(name, error),
-      (error) => this.reportError(name, error),
-      () => {},
+    return createReconcilerRoot(container, `awtrix-runtime-${name}`, (error) =>
+      this.reportError(name, error),
     );
   }
 

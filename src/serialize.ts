@@ -1,5 +1,6 @@
 import type {
   AppPayload,
+  AppProps,
   AwtrixContainer,
   AwtrixInstance,
   AwtrixNode,
@@ -7,6 +8,36 @@ import type {
   DrawCommand,
 } from "./types.ts";
 import { DEFAULT_TEXT_CHAR_WIDTH, normalizeColor } from "./types.ts";
+
+// ─── AppPayload key definitions ────────────────────────────────────────────
+
+// Keys that can be copied directly without color normalization
+const APP_PAYLOAD_MERGE_KEYS = [
+  "icon",
+  "duration",
+  "lifetime",
+  "lifetimeMode",
+  "text",
+  "textCase",
+  "topText",
+  "textOffset",
+  "center",
+  "noScroll",
+  "scrollSpeed",
+  "effect",
+  "effectSettings",
+  "overlay",
+  "progress",
+  "bar",
+  "line",
+  "rainbow",
+  "pushIcon",
+  "repeat",
+  "save",
+] as const satisfies ReadonlyArray<keyof AppPayload>;
+
+// Keys that need normalizeColor (Color → string)
+const APP_PAYLOAD_COLOR_KEYS = ["background", "progressC", "progressBC"] as const;
 
 function collectText(children: AwtrixNode[]): string {
   let value = "";
@@ -217,31 +248,21 @@ function collectDrawCommands(
   }
 }
 
-function mergeAppProps(target: AppPayload, source: AppPayload): void {
-  if (source.icon !== undefined) target.icon = source.icon;
-  if (source.duration !== undefined) target.duration = source.duration;
-  if (source.lifetime !== undefined) target.lifetime = source.lifetime;
-  if (source.lifetimeMode !== undefined) target.lifetimeMode = source.lifetimeMode;
-  if (source.text !== undefined) target.text = source.text;
-  if (source.textCase !== undefined) target.textCase = source.textCase;
-  if (source.topText !== undefined) target.topText = source.topText;
-  if (source.textOffset !== undefined) target.textOffset = source.textOffset;
-  if (source.center !== undefined) target.center = source.center;
-  if (source.noScroll !== undefined) target.noScroll = source.noScroll;
-  if (source.scrollSpeed !== undefined) target.scrollSpeed = source.scrollSpeed;
-  if (source.background !== undefined) target.background = source.background;
-  if (source.effect !== undefined) target.effect = source.effect;
-  if (source.effectSettings !== undefined) target.effectSettings = source.effectSettings;
-  if (source.overlay !== undefined) target.overlay = source.overlay;
-  if (source.progress !== undefined) target.progress = source.progress;
-  if (source.progressC !== undefined) target.progressC = source.progressC;
-  if (source.progressBC !== undefined) target.progressBC = source.progressBC;
-  if (source.bar !== undefined) target.bar = source.bar;
-  if (source.line !== undefined) target.line = source.line;
-  if (source.rainbow !== undefined) target.rainbow = source.rainbow;
-  if (source.pushIcon !== undefined) target.pushIcon = source.pushIcon;
-  if (source.repeat !== undefined) target.repeat = source.repeat;
-  if (source.save !== undefined) target.save = source.save;
+function mergeAppProps(target: AppPayload, source: AppProps): void {
+  for (const key of APP_PAYLOAD_MERGE_KEYS) {
+    const value = source[key];
+    if (value !== undefined) {
+      (target as Record<string, unknown>)[key] = value;
+    }
+  }
+
+  // Handle color keys separately (need normalizeColor)
+  for (const key of APP_PAYLOAD_COLOR_KEYS) {
+    const value = source[key];
+    if (value !== undefined) {
+      (target as Record<string, unknown>)[key] = normalizeColor(value);
+    }
+  }
 }
 
 function collectAppProps(nodes: AwtrixNode[]): AppPayload {
@@ -253,37 +274,7 @@ function collectAppProps(nodes: AwtrixNode[]): AppPayload {
     }
 
     if (node.type === "app") {
-      const fromApp: AppPayload = {
-        icon: node.props.icon,
-        duration: node.props.duration,
-        lifetime: node.props.lifetime,
-        lifetimeMode: node.props.lifetimeMode,
-        text: node.props.text,
-        textCase: node.props.textCase,
-        topText: node.props.topText,
-        textOffset: node.props.textOffset,
-        center: node.props.center,
-        noScroll: node.props.noScroll,
-        scrollSpeed: node.props.scrollSpeed,
-        background:
-          node.props.background === undefined ? undefined : normalizeColor(node.props.background),
-        effect: node.props.effect,
-        effectSettings: node.props.effectSettings,
-        overlay: node.props.overlay,
-        progress: node.props.progress,
-        progressC:
-          node.props.progressC === undefined ? undefined : normalizeColor(node.props.progressC),
-        progressBC:
-          node.props.progressBC === undefined ? undefined : normalizeColor(node.props.progressBC),
-        bar: node.props.bar,
-        line: node.props.line,
-        rainbow: node.props.rainbow,
-        pushIcon: node.props.pushIcon,
-        repeat: node.props.repeat,
-        save: node.props.save,
-      };
-
-      mergeAppProps(appPayload, fromApp);
+      mergeAppProps(appPayload, node.props);
     }
   }
 

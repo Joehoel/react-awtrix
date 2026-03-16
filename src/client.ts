@@ -1,6 +1,6 @@
 /**
  * HTTP client for the Awtrix 3 API.
- * All methods are fire-and-forget with error logging.
+ * All methods throw on non-ok responses.
  */
 
 import type { AwtrixPayload } from "./types.ts";
@@ -22,19 +22,19 @@ export async function pushApp(
   });
 
   if (!res.ok) {
-    console.error(`[react-awtrix] Failed to push app "${name}": ${res.status} ${res.statusText}`);
+    throw new Error(`[react-awtrix] Failed to push app "${name}": ${res.status} ${res.statusText}`);
   }
 }
 
 export async function deleteApp(host: string, port: number, name: string): Promise<void> {
   const res = await fetch(url(host, port, `/api/custom?name=${name}`), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}",
+    method: "DELETE",
   });
 
   if (!res.ok) {
-    console.error(`[react-awtrix] Failed to delete app "${name}": ${res.status} ${res.statusText}`);
+    throw new Error(
+      `[react-awtrix] Failed to delete app "${name}": ${res.status} ${res.statusText}`,
+    );
   }
 }
 
@@ -50,6 +50,6 @@ export async function pushNotify(
   });
 
   if (!res.ok) {
-    console.error(`[react-awtrix] Failed to push notification: ${res.status} ${res.statusText}`);
+    throw new Error(`[react-awtrix] Failed to push notification: ${res.status} ${res.statusText}`);
   }
 }
