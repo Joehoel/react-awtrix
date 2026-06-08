@@ -1,0 +1,19 @@
+# Home Assistant local add-on manifest.
+# Docs: https://developers.home-assistant.io/docs/add-ons/configuration/
+name: React AWTRIX
+slug: react_awtrix
+description: Render React components to an AWTRIX 3 clock, driven by Home Assistant state.
+version: "0.1.0"
+arch:
+  - aarch64
+  - amd64
+# We bundle the app into a single self-contained file and run it on the
+# official multi-arch Bun image (see Dockerfile), so no s6/bashio needed.
+init: false
+# Grants SUPERVISOR_TOKEN + the internal Core proxy (ws://supervisor/core/websocket).
+# This is what lets the add-on talk to Home Assistant with zero configured tokens.
+homeassistant_api: true
+options:
+  awtrix_host: "192.168.1.45"
+schema:
+  awtrix_host: str

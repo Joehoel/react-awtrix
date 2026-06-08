@@ -1,0 +1,13 @@
+{
+  "name": "react-awtrix-infra",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "bun run deploy.ts",
+    "destroy": "bun run deploy.ts --destroy"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
