@@ -5,7 +5,7 @@ slug: react_awtrix
 description: Render React components to an AWTRIX 3 clock, driven by Home Assistant state.
 # Unquoted on purpose: the builder's info helper passes these through verbatim,
 # and quotes would end up inside the image tag (invalid reference).
-version: 0.2.0
+version: 0.3.0
 # Prebuilt multi-arch image published to GHCR by CI. Store installs pull this;
 # local/SSH deploys strip it (see build.ts) and build from the Dockerfile.
 image: ghcr.io/joehoel/react-awtrix/react_awtrix
@@ -18,6 +18,10 @@ init: false
 # Grants SUPERVISOR_TOKEN + the internal Core proxy (ws://supervisor/core/websocket).
 # This is what lets the add-on talk to Home Assistant with zero configured tokens.
 homeassistant_api: true
+# Grants access to the Supervisor API (http://supervisor/services/mqtt, etc.)
+# so the add-on can discover the MQTT broker configuration automatically.
+hassio_api: true
+hassio_role: default
 options:
   awtrix_host: ""
   awtrix_mqtt_prefix: ""
