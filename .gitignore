@@ -23,6 +23,7 @@ report.*.json
 
 # add-on build output + alchemy state
 addon/staging/
+addon/main.js
 .alchemy/
 
 # caches

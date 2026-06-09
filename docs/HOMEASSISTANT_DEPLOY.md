@@ -81,8 +81,13 @@ runtime pushes the diff to the device.
 
 ## Trade-offs
 
-- The custom-resource deploy needs the SSH add-on with Protection mode off.
-  The more locked-down alternative is GitOps: publish `addon/` as a GitHub
-  add-on repository and install/update from the HA store.
+- Two distribution models, both wired up:
+  - **GitOps (recommended):** CI (`.github/workflows/build-addon.yaml`) builds
+    multi-arch images to GHCR and `repository.yaml` makes this an HA add-on
+    repository — add the repo URL in HA and install/update from the store, no SSH.
+    See `addon/README.md`.
+  - **SSH / Alchemy local build:** the custom-resource deploy needs the SSH
+    add-on with Protection mode off — handy for dev (builds your changes locally
+    without waiting for CI).
 - Alchemy v2 is in beta — pin `alchemy` to exactly `2.0.0-beta.52` (a caret
   range resolves to a broken interim build) and use Effect 4.

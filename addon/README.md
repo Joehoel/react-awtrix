@@ -41,12 +41,27 @@ bun run build      # writes staging/main.js, staging/config.yaml, staging/Docker
 
 ## Deploy
 
-Deployment is declarative — see [`../infra`](../infra). It rsyncs `staging/`
-into `/addons/react_awtrix` on the Pi and drives the Supervisor (`ha addons …`).
+Two ways:
 
-To do it by hand instead: copy `staging/` to `/addons/react_awtrix/` on the Pi
-(via the Samba or SSH add-on), then **Settings → Add-ons → ⋮ → Check for
-updates** and install the new local add-on.
+### A. Install from the Home Assistant store (CI-published) — recommended
+
+CI (`.github/workflows/build-addon.yaml`) builds multi-arch images and pushes
+them to GHCR, and the repo root has a `repository.yaml`, so this is a real HA
+add-on repository:
+
+1. In Home Assistant: **Settings → Add-ons → Add-on Store → ⋮ → Repositories**,
+   add `https://github.com/Joehoel/react-awtrix`.
+2. Install **React AWTRIX** from the store; set the `awtrix_host` option; start.
+
+Updates ship by bumping `version` in `config.yaml` and merging to `main` — the
+Supervisor then offers the update. (One-time: after the first publish, make the
+GHCR package **public** in GitHub so the Supervisor can pull it without auth.)
+
+### B. SSH / Alchemy local deploy (dev) — see [`../infra`](../infra)
+
+Builds locally on the Pi from the Dockerfile (the staged `config.yaml` has its
+`image:` stripped), so you can iterate without waiting for CI. It rsyncs
+`staging/` into `/addons/react_awtrix` and drives the Supervisor (`ha addons …`).
 
 ## Notes
 

@@ -30,9 +30,15 @@ if (!result.success) {
   throw new Error("[build] bundle failed");
 }
 
-// The Supervisor build context is the add-on folder, so the manifest and
-// Dockerfile must sit next to the bundle.
-await cp(join(here, "config.yaml"), join(staging, "config.yaml"));
+// The Supervisor build context is the add-on folder, so the manifest, build
+// config, and Dockerfile must sit next to the bundle.
+//
+// Strip the `image:` field for local/SSH deploys so the Supervisor builds the
+// container from the Dockerfile on the Pi. The committed config.yaml keeps
+// `image:` so store installs pull the prebuilt image published by CI.
+const config = await Bun.file(join(here, "config.yaml")).text();
+await Bun.write(join(staging, "config.yaml"), config.replace(/^image:.*\n?/m, ""));
 await cp(join(here, "Dockerfile"), join(staging, "Dockerfile"));
+await cp(join(here, "build.yaml"), join(staging, "build.yaml"));
 
 console.log(`[build] staging ready: ${staging}`);
