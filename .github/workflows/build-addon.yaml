@@ -30,8 +30,8 @@ jobs:
       build_matrix: ${{ steps.matrix.outputs.matrix }}
       image_name: ${{ steps.normalize.outputs.image_name }}
       registry_prefix: ${{ steps.normalize.outputs.registry_prefix }}
-      version: ${{ steps.info.outputs.version }}
-      name: ${{ steps.info.outputs.name }}
+      version: ${{ steps.normalize.outputs.version }}
+      name: ${{ steps.normalize.outputs.name }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v6.0.3
@@ -42,12 +42,23 @@ jobs:
         with:
           path: "./addon"
 
-      - name: Normalize image name
+      - name: Normalize add-on info
         id: normalize
+        # The info helper emits values with surrounding quotes; strip them (via
+        # env vars to stay injection-safe) so the version doesn't end up inside
+        # the image tag, e.g. `...:"0.1.0"` -> invalid reference.
+        env:
+          INFO_IMAGE: ${{ steps.info.outputs.image }}
+          INFO_VERSION: ${{ steps.info.outputs.version }}
+          INFO_NAME: ${{ steps.info.outputs.name }}
         run: |
-          image="${{ steps.info.outputs.image }}"
+          image=${INFO_IMAGE//\"/}
+          version=${INFO_VERSION//\"/}
+          name=${INFO_NAME//\"/}
           echo "image_name=${image##*/}" >> "$GITHUB_OUTPUT"
           echo "registry_prefix=${image%/*}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
 
       - name: Prepare build matrix
         id: matrix
