@@ -25,6 +25,9 @@ jobs:
   prepare:
     name: Prepare
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     outputs:
       architectures: ${{ steps.info.outputs.architectures }}
       build_matrix: ${{ steps.matrix.outputs.matrix }}
@@ -32,6 +35,8 @@ jobs:
       registry_prefix: ${{ steps.normalize.outputs.registry_prefix }}
       version: ${{ steps.normalize.outputs.version }}
       name: ${{ steps.normalize.outputs.name }}
+      build: ${{ steps.decide.outputs.build }}
+      publish: ${{ steps.decide.outputs.publish }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v6.0.3
@@ -68,9 +73,42 @@ jobs:
           image-name: ${{ steps.normalize.outputs.image_name }}
           registry-prefix: ${{ steps.normalize.outputs.registry_prefix }}
 
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Decide whether to build/publish
+        id: decide
+        # PRs always build (validation) but never publish. Pushes only build +
+        # publish when this version isn't already in the registry, so re-merges
+        # that don't bump the version are a no-op instead of clobbering the tag.
+        env:
+          EVENT: ${{ github.event_name }}
+          IMAGE: ${{ steps.normalize.outputs.registry_prefix }}/${{ steps.normalize.outputs.image_name }}
+          VERSION: ${{ steps.normalize.outputs.version }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if docker manifest inspect "${IMAGE}:${VERSION}" > /dev/null 2>&1; then
+            echo "::notice::${IMAGE}:${VERSION} already published — skipping build/publish."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
     name: Build ${{ matrix.arch }} image
     needs: prepare
+    if: needs.prepare.outputs.build == 'true'
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -107,13 +145,13 @@ jobs:
           labels: |
             io.hass.type=addon
             io.hass.name=${{ needs.prepare.outputs.name }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ needs.prepare.outputs.publish == 'true' }}
           version: ${{ needs.prepare.outputs.version }}
 
   manifest:
     name: Publish multi-arch manifest
     needs: [prepare, build]
-    if: github.event_name != 'pull_request'
+    if: needs.prepare.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
