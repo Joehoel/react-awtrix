@@ -5,7 +5,7 @@ slug: react_awtrix
 description: Render React components to an AWTRIX 3 clock, driven by Home Assistant state.
 # Unquoted on purpose: the builder's info helper passes these through verbatim,
 # and quotes would end up inside the image tag (invalid reference).
-version: 0.3.4
+version: 0.4.0
 # Prebuilt multi-arch image published to GHCR by CI. Store installs pull this;
 # local/SSH deploys strip it (see build.ts) and build from the Dockerfile.
 image: ghcr.io/joehoel/react-awtrix/react_awtrix

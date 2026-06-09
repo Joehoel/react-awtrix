@@ -1,3 +1,9 @@
+## [0.4.0](https://github.com/Joehoel/react-awtrix/compare/v0.3.4...v0.4.0) (2026-06-09)
+
+### Features
+
+* **addon:** support direct MQTT env vars for local dev ([0c7b787](https://github.com/Joehoel/react-awtrix/commit/0c7b787fd7d9b31c2cd78ba410d89f5c1c5b86f2))
+
 ## [0.3.4](https://github.com/Joehoel/react-awtrix/compare/v0.3.3...v0.3.4) (2026-06-09)
 
 ### Bug Fixes
