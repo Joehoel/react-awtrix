@@ -1,37 +1,13 @@
 import ReactReconciler from "react-reconciler";
 import { ConcurrentRoot } from "react-reconciler/constants.js";
 import {
-  parseAppProps,
-  parseBitmapProps,
-  parseCircleProps,
-  parseLineProps,
-  parsePixelProps,
-  parseRectProps,
-  parseTextProps,
-} from "./props.ts";
+  createElementInstance,
+  resolveElementType,
+  updateElementInstance,
+  validHostElementNames,
+} from "./elements.ts";
 import { serialize } from "./serialize.ts";
-import type {
-  AwtrixContainer,
-  AwtrixInstance,
-  AwtrixNode,
-  AwtrixTextInstance,
-  ElementType,
-} from "./types.ts";
-import { resolveElementType } from "./types.ts";
-
-// ─── Parser registry ───────────────────────────────────────────────────────
-
-type PropsParser = (props: unknown) => AwtrixInstance["props"];
-
-const parsers: Record<ElementType, PropsParser> = {
-  pixel: parsePixelProps,
-  line: parseLineProps,
-  rect: parseRectProps,
-  circle: parseCircleProps,
-  text: parseTextProps,
-  bitmap: parseBitmapProps,
-  app: parseAppProps,
-};
+import type { AwtrixContainer, AwtrixInstance, AwtrixNode, AwtrixTextInstance } from "./types.ts";
 
 // ─── Event priority constants (React internals) ───────────────────────────
 
@@ -134,16 +110,6 @@ function insertBeforeInArray(arr: ChildNode[], item: ChildNode, before: ChildNod
 
 // ─── Reconciler host config ────────────────────────────────────────────────
 
-function createAwtrixInstance(type: ElementType, props: unknown): AwtrixInstance {
-  const parser = parsers[type];
-  return { type, props: parser(props), children: [], hidden: false } as AwtrixInstance;
-}
-
-function updateAwtrixInstance(instance: AwtrixInstance, nextProps: unknown): void {
-  const parser = parsers[instance.type];
-  (instance as { props: unknown }).props = parser(nextProps);
-}
-
 const hostConfig: ReactReconciler.HostConfig<
   /* Type             */ string,
   /* Props            */ unknown,
@@ -174,11 +140,11 @@ const hostConfig: ReactReconciler.HostConfig<
     if (elementType === undefined) {
       throw new Error(
         `[react-awtrix] Unknown element <${type}>. ` +
-          `Valid elements: awtrix-app, awtrix-pixel, awtrix-line, awtrix-rect, awtrix-circle, awtrix-text, awtrix-bitmap`,
+          `Valid elements: ${validHostElementNames().join(", ")}`,
       );
     }
 
-    return createAwtrixInstance(elementType, props);
+    return createElementInstance(elementType, props);
   },
 
   createTextInstance(text) {
@@ -265,7 +231,7 @@ const hostConfig: ReactReconciler.HostConfig<
   },
 
   commitUpdate(instance, _type, _prevProps, nextProps) {
-    updateAwtrixInstance(instance, nextProps);
+    updateElementInstance(instance, nextProps);
   },
 
   resetTextContent() {},

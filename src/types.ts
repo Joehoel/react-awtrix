@@ -91,22 +91,6 @@ export interface AppProps {
   save?: boolean;
 }
 
-export type ElementType = "pixel" | "line" | "rect" | "circle" | "text" | "bitmap" | "app";
-
-const hostElementTypeMap: Record<string, ElementType> = {
-  "awtrix-app": "app",
-  "awtrix-pixel": "pixel",
-  "awtrix-line": "line",
-  "awtrix-rect": "rect",
-  "awtrix-circle": "circle",
-  "awtrix-text": "text",
-  "awtrix-bitmap": "bitmap",
-};
-
-export function resolveElementType(value: string): ElementType | undefined {
-  return hostElementTypeMap[value];
-}
-
 export type DrawCommand =
   | { dp: [x: number, y: number, color: string] }
   | { dl: [x0: number, y0: number, x1: number, y1: number, color: string] }
