@@ -1,12 +1,21 @@
 import type { ReactNode } from "react";
 import { createReconcilerRoot, reconciler } from "./reconciler.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
-import type { AwtrixAppContainer, AwtrixPayload } from "./types.ts";
+import type {
+  AwtrixAppContainer,
+  AwtrixNotifyContainer,
+  AwtrixPayload,
+  NotifyPayloadOptions,
+} from "./types.ts";
 
-export interface AppRenderSession {
+export interface RenderSession {
   update(element: ReactNode): void;
-  unmount(options?: { deleteOnDevice?: boolean }): Promise<void>;
+  unmount(): void;
   cancelPendingFlush(): void;
+}
+
+export interface AppRenderSession extends Omit<RenderSession, "unmount"> {
+  unmount(options?: { deleteOnDevice?: boolean }): Promise<void>;
 }
 
 export interface AppRenderSessionOptions {
@@ -19,6 +28,55 @@ export interface AppRenderSessionOptions {
   requestFlush: (payload: AwtrixPayload) => Promise<void>;
   requestDelete: () => Promise<void>;
   onError?: (error: unknown) => void;
+}
+
+export interface NotifyRenderSessionOptions {
+  width?: number;
+  height?: number;
+  debug?: boolean;
+  notifyOptions?: NotifyPayloadOptions;
+  requestFlush: (payload: AwtrixPayload) => Promise<void>;
+  onFlush?: () => void;
+  onFlushError?: (error: unknown) => void;
+  onError?: (error: unknown) => void;
+}
+
+function createBaseRenderSession(
+  container: AwtrixAppContainer | AwtrixNotifyContainer,
+  identifierPrefix: string,
+  onError: ((error: unknown) => void) | undefined,
+): RenderSession {
+  let disposed = false;
+  const root = createReconcilerRoot(container, identifierPrefix, onError);
+
+  function cancelPendingFlush(): void {
+    if (container.pendingFlush !== undefined) {
+      clearTimeout(container.pendingFlush);
+      container.pendingFlush = undefined;
+    }
+  }
+
+  return {
+    update(element) {
+      if (disposed) {
+        return;
+      }
+
+      reconciler.updateContainer(element, root, null, null);
+    },
+
+    unmount() {
+      if (disposed) {
+        return;
+      }
+
+      disposed = true;
+      reconciler.updateContainer(null, root, null, null);
+      cancelPendingFlush();
+    },
+
+    cancelPendingFlush,
+  };
 }
 
 export function createAppRenderSession(options: AppRenderSessionOptions): AppRenderSession {
@@ -51,14 +109,7 @@ export function createAppRenderSession(options: AppRenderSessionOptions): AppRen
     },
   };
 
-  const root = createReconcilerRoot(container, options.identifierPrefix, options.onError);
-
-  function cancelPendingFlush(): void {
-    if (container.pendingFlush !== undefined) {
-      clearTimeout(container.pendingFlush);
-      container.pendingFlush = undefined;
-    }
-  }
+  const session = createBaseRenderSession(container, options.identifierPrefix, options.onError);
 
   return {
     update(element) {
@@ -66,7 +117,7 @@ export function createAppRenderSession(options: AppRenderSessionOptions): AppRen
         return;
       }
 
-      reconciler.updateContainer(element, root, null, null);
+      session.update(element);
     },
 
     unmount(unmountOptions = {}) {
@@ -76,8 +127,7 @@ export function createAppRenderSession(options: AppRenderSessionOptions): AppRen
 
       unmountPromise = (async () => {
         disposed = true;
-        reconciler.updateContainer(null, root, null, null);
-        cancelPendingFlush();
+        session.unmount();
 
         if (unmountOptions.deleteOnDevice !== false) {
           await container.requestDelete();
@@ -87,6 +137,53 @@ export function createAppRenderSession(options: AppRenderSessionOptions): AppRen
       return unmountPromise;
     },
 
-    cancelPendingFlush,
+    cancelPendingFlush: session.cancelPendingFlush,
+  };
+}
+
+export function createNotifyRenderSession(options: NotifyRenderSessionOptions): RenderSession {
+  let disposed = false;
+
+  const container: AwtrixNotifyContainer = {
+    appName: "__notify",
+    mode: "notify",
+    notifyOptions: options.notifyOptions,
+    matrixWidth: options.width ?? DEFAULT_MATRIX_WIDTH,
+    matrixHeight: options.height ?? DEFAULT_MATRIX_HEIGHT,
+    children: [],
+    debug: options.debug ?? false,
+    debounceMs: 0,
+    onFlush: options.onFlush,
+    onFlushError: options.onFlushError,
+    requestFlush: async (payload) => {
+      if (disposed) {
+        return;
+      }
+
+      await options.requestFlush(payload);
+    },
+  };
+
+  const session = createBaseRenderSession(container, "awtrix-notify", options.onError);
+
+  return {
+    update(element) {
+      if (disposed) {
+        return;
+      }
+
+      session.update(element);
+    },
+
+    unmount() {
+      if (disposed) {
+        return;
+      }
+
+      disposed = true;
+      session.unmount();
+    },
+
+    cancelPendingFlush: session.cancelPendingFlush,
   };
 }

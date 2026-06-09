@@ -1,15 +1,7 @@
 import type { ReactNode } from "react";
 import { resolveProtocol } from "./protocols/resolve.ts";
-import { createReconcilerRoot, reconciler } from "./reconciler.ts";
-import { createAppRenderSession } from "./render-session.ts";
-import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
-import type {
-  AwtrixNotifyContainer,
-  NotifyOptions,
-  NotifyPayloadOptions,
-  RenderHandle,
-  RenderOptions,
-} from "./types.ts";
+import { createAppRenderSession, createNotifyRenderSession } from "./render-session.ts";
+import type { NotifyOptions, NotifyPayloadOptions, RenderHandle, RenderOptions } from "./types.ts";
 
 function createOperationQueue(): (operation: () => Promise<void>) => Promise<void> {
   let chain: Promise<void> = Promise.resolve();
@@ -134,7 +126,7 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
   return new Promise((resolve, reject) => {
     let completed = false;
     let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-    let root: ReturnType<typeof createReconcilerRoot> | undefined;
+    let session: ReturnType<typeof createNotifyRenderSession> | undefined;
 
     const cleanup = (): void => {
       if (timeoutHandle !== undefined) {
@@ -143,15 +135,11 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
       }
     };
 
-    const container: AwtrixNotifyContainer = {
-      appName: "__notify",
-      mode: "notify",
+    session = createNotifyRenderSession({
       notifyOptions: notifyPayloadOptions,
-      matrixWidth: options.width ?? DEFAULT_MATRIX_WIDTH,
-      matrixHeight: options.height ?? DEFAULT_MATRIX_HEIGHT,
-      children: [],
-      debug: options.debug ?? false,
-      debounceMs: 0, // notifications flush immediately
+      width: options.width,
+      height: options.height,
+      debug: options.debug,
       onFlush() {
         if (completed) return;
         completed = true;
@@ -167,39 +155,30 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
       requestFlush: async (payload) => {
         await protocol.pushNotify(payload);
       },
-    };
-
-    root = createReconcilerRoot(container, "awtrix-notify", (err) => {
-      console.error("[react-awtrix] Uncaught:", err);
-      if (!completed) {
-        completed = true;
-        cleanup();
-        reject(err);
-      }
+      onError(error) {
+        console.error("[react-awtrix] Uncaught:", error);
+        if (!completed) {
+          completed = true;
+          cleanup();
+          reject(error);
+        }
+      },
     });
 
     timeoutHandle = setTimeout(() => {
-      if (completed) return;
-      completed = true;
+      if (!completed) {
+        completed = true;
 
-      // Clean up the React root
-      if (root !== undefined) {
-        reconciler.updateContainer(null, root, null, null);
+        session?.unmount();
+
+        reject(
+          new Error(
+            `[react-awtrix] notify() timed out after ${timeoutMs}ms — did the component render anything?`,
+          ),
+        );
       }
-
-      // Cancel any pending flush
-      if (container.pendingFlush !== undefined) {
-        clearTimeout(container.pendingFlush);
-        container.pendingFlush = undefined;
-      }
-
-      reject(
-        new Error(
-          `[react-awtrix] notify() timed out after ${timeoutMs}ms — did the component render anything?`,
-        ),
-      );
     }, timeoutMs);
 
-    reconciler.updateContainer(element, root, null, null);
+    session.update(element);
   });
 }

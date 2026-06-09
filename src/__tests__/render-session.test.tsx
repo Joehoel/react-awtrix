@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { App, Text } from "../components.tsx";
-import { createAppRenderSession } from "../render-session.ts";
+import { createAppRenderSession, createNotifyRenderSession } from "../render-session.ts";
 import type { AwtrixPayload } from "../types.ts";
 
 async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
@@ -97,5 +97,81 @@ describe("AppRenderSession", () => {
 
     expect(pushed).toEqual([]);
     expect(deleted).toEqual(["idempotent-session"]);
+  });
+});
+
+describe("NotifyRenderSession", () => {
+  test("flushes a notification payload and reports completion", async () => {
+    const pushed: AwtrixPayload[] = [];
+    let flushed = false;
+
+    const session = createNotifyRenderSession({
+      notifyOptions: {
+        hold: true,
+        sound: "ding",
+      },
+      requestFlush: async (payload) => {
+        pushed.push(payload);
+      },
+      onFlush() {
+        flushed = true;
+      },
+    });
+
+    session.update(textApp("Notify"));
+
+    await waitFor(() => flushed);
+    expect(pushed).toEqual([
+      {
+        hold: true,
+        sound: "ding",
+        draw: [{ dt: [0, 7, "Notify", "#FFFFFF"] }],
+      },
+    ]);
+
+    session.unmount();
+  });
+
+  test("reports notification flush errors", async () => {
+    const expectedError = new Error("notify failed");
+    let flushError: unknown;
+    const originalConsoleError = console.error;
+    console.error = (..._args: unknown[]) => {};
+
+    try {
+      const session = createNotifyRenderSession({
+        requestFlush: async () => {
+          throw expectedError;
+        },
+        onFlushError(error) {
+          flushError = error;
+        },
+      });
+
+      session.update(textApp("Boom"));
+
+      await waitFor(() => flushError !== undefined);
+      expect(flushError).toBe(expectedError);
+
+      session.unmount();
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+
+  test("unmount cancels a pending notification flush", async () => {
+    const pushed: AwtrixPayload[] = [];
+
+    const session = createNotifyRenderSession({
+      requestFlush: async (payload) => {
+        pushed.push(payload);
+      },
+    });
+
+    session.update(textApp("Cancelled"));
+    session.unmount();
+    await Bun.sleep(20);
+
+    expect(pushed).toEqual([]);
   });
 });
