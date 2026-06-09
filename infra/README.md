@@ -1,28 +1,31 @@
-# react-awtrix infra — declarative deploy to the Pi
+# react-awtrix infra — declarative deploy to the Pi (Alchemy v2)
 
-Deploys the [`../addon`](../addon) Home Assistant add-on to your Pi by driving
-the Supervisor over SSH (build → rsync into `/addons` → `ha addons …`).
+Deploys the [`../addon`](../addon) Home Assistant add-on to your Pi with a
+**custom Alchemy v2 resource** (`HassAddon`) that drives the Supervisor over SSH
+(build → rsync into `/addons` → `ha addons …`). State is **local** — this deploy
+never touches Cloudflare.
 
 ```
 infra/
-├─ deploy.ts        # ✅ WORKS TODAY — plain Bun deploy/destroy script
-├─ HassAddon.ts     # ⚠️ Alchemy v2 custom resource (reference/experiment)
-└─ alchemy.run.ts   # ⚠️ Alchemy v2 stack (reference/experiment)
+├─ alchemy.run.ts   # the stack (Alchemy.Stack + localState)
+├─ HassAddon.ts     # custom resource + provider (reconcile/delete/read)
+└─ deploy.ts        # zero-dependency Bun script (same logic, no Alchemy)
 ```
 
-## ⚠️ Status: Alchemy v2 is not usable from npm yet
+## Versions matter (this is what tripped me up earlier)
 
-I verified this directly: the published `alchemy` package currently resolves to a
-broken pipeline build (`2.0.0-pipeline-v2-test`) that ships unbuilt TypeScript
-with type errors and no proper `exports` — it doesn't install/run, and its API
-doesn't match the documented v2 model. So `HassAddon.ts` / `alchemy.run.ts` are
-kept as a **reference** of the intended custom-resource design (matching the
-`alchemy-effect` `main` source: `Resource` + `Provider.succeed` +
-`reconcile`/`delete`/`read`). Revisit once v2 has a real release, or run Alchemy
-from a git checkout.
+Alchemy v2 is in beta, and its prerelease range on npm is messy — `^2.0.0-beta.52`
+resolves to a broken interim build. Pin **exactly**, and use **Effect 4**:
 
-Until then, `deploy.ts` does the exact same reconcile/destroy logic with zero
-dependencies.
+```jsonc
+"devDependencies": { "alchemy": "2.0.0-beta.52" },   // exact, no caret
+"dependencies":    { "effect": "^4.0.0-beta.78" }     // Effect 4, not 3
+```
+
+These are the versions from the working reference (`Joehoel/throwback`). With them,
+this stack typechecks and loads cleanly. The custom-resource shape mirrors that
+repo's `web/infra/cloudflare` resources: `Resource<T>(...)` + `Provider.succeed`,
+with `stables` / `reconcile` / `delete` / `read`.
 
 ## Prerequisites on the Pi (Home Assistant OS)
 
@@ -30,19 +33,21 @@ dependencies.
 2. Turn **Protection mode OFF** (needed for the `ha` CLI and `/addons` access).
 3. Add your SSH public key in that add-on's configuration.
 
-## Usage (works today)
+## Usage
 
 ```bash
 cd infra
+bun install
 
-# build the add-on, sync it, and (re)start it via the Supervisor
-HA_SSH_HOST=homeassistant.local HA_SSH_USER=root bun run deploy
-
-# tear it down
-bun run destroy
+HA_SSH_HOST=homeassistant.local HA_SSH_USER=root bun run plan    # preview
+bun run deploy                                                    # apply
+bun run destroy                                                   # tear down
 ```
 
 Then set the add-on's `awtrix_host` option in the HA UI and restart it.
+
+> Prefer no dependencies? `bun run deploy:script` runs `deploy.ts`, which does the
+> same build/sync/restart with zero packages — handy as a fallback.
 
 ## Trade-offs
 

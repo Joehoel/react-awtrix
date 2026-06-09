@@ -4,10 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "deploy": "bun run deploy.ts",
-    "destroy": "bun run deploy.ts --destroy"
+    "deploy": "alchemy deploy",
+    "plan": "alchemy plan",
+    "destroy": "alchemy destroy",
+    "deploy:script": "bun run deploy.ts",
+    "destroy:script": "bun run deploy.ts --destroy"
+  },
+  "dependencies": {
+    "effect": "^4.0.0-beta.78"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "alchemy": "2.0.0-beta.52"
   }
 }

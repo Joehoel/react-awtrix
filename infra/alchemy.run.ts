@@ -1,26 +1,25 @@
 /**
  * Alchemy v2 stack: declaratively deploy the react-awtrix add-on to the Pi.
  *
- * ⚠️ REFERENCE / EXPERIMENT — see the status note in HassAddon.ts. Alchemy v2 is
- * not yet installable from npm, so this stack does not run today. Use the
- * working `deploy.ts` (`bun run deploy`) until v2 has a real release.
+ *   bun run plan       # preview
+ *   bun run deploy     # build + sync + (re)start the add-on
+ *   bun run destroy    # uninstall it and clean /addons
  *
- * Configure via env (or edit inline):
+ * State is local (no cloud account needed) — this deploy never touches
+ * Cloudflare. Configure via env (or edit inline):
  *   HA_SSH_HOST   default "homeassistant.local"
  *   HA_SSH_USER   default "root"
  */
-import { Effect } from "effect";
-import { Alchemy, State } from "alchemy";
+import * as Alchemy from "alchemy";
+import { localState } from "alchemy/State/LocalState";
+import * as Effect from "effect/Effect";
 import { HassAddon, HassAddonProvider } from "./HassAddon.ts";
 
 export default Alchemy.Stack(
-  "awtrix-pi",
+  "AwtrixPi",
   {
-    providers: [HassAddonProvider],
-    // Local file-based state — no cloud account required. The Cloudflare
-    // equivalent is `Cloudflare.state()`; verify this helper name against the
-    // v2 docs if it has moved.
-    state: State.local(),
+    providers: HassAddonProvider(),
+    state: localState(),
   },
   Effect.gen(function* () {
     const addon = yield* HassAddon("clock", {
@@ -31,6 +30,8 @@ export default Alchemy.Stack(
       build: "cd ../addon && bun run build",
     });
 
-    return { addonState: addon.state };
+    return {
+      state: addon.state,
+    };
   }),
 );

@@ -37,14 +37,14 @@ dev machine ── alchemy deploy ──ssh──▶ Pi: rsync /addons + `ha add
 
 ## Layout
 
-| Path                   | What                                              |
-| ---------------------- | ------------------------------------------------- |
-| `addon/`               | The Home Assistant add-on (Docker + bundled app)  |
-| `addon/src/ha.tsx`     | HA binding: `useEntity`, `callHassService`        |
-| `addon/src/clock.tsx`  | Example widget (clock + live temperature)         |
-| `infra/deploy.ts`      | Plain Bun deploy/destroy script (works today)     |
-| `infra/HassAddon.ts`   | Alchemy v2 custom resource (reference/experiment) |
-| `infra/alchemy.run.ts` | Alchemy v2 stack (reference/experiment)           |
+| Path                   | What                                               |
+| ---------------------- | -------------------------------------------------- |
+| `addon/`               | The Home Assistant add-on (Docker + bundled app)   |
+| `addon/src/ha.tsx`     | HA binding: `useEntity`, `callHassService`         |
+| `addon/src/clock.tsx`  | Example widget (clock + live temperature)          |
+| `infra/alchemy.run.ts` | Alchemy v2 stack (`Alchemy.Stack` + `localState`)  |
+| `infra/HassAddon.ts`   | Alchemy v2 custom resource (reconcile/delete/read) |
+| `infra/deploy.ts`      | Zero-dependency Bun deploy script (same logic)     |
 
 ## One-time setup on the Pi
 
@@ -56,16 +56,16 @@ dev machine ── alchemy deploy ──ssh──▶ Pi: rsync /addons + `ha add
 
 ```bash
 cd infra
+bun install
 bun run deploy     # builds addon/staging, syncs it, (re)starts the add-on
 ```
 
 Then set the add-on's `awtrix_host` option (Settings → Add-ons → React AWTRIX →
 Configuration) to your device IP and restart it.
 
-> `deploy.ts` is a plain Bun script that works today. The Alchemy v2 versions
-> (`HassAddon.ts` / `alchemy.run.ts`) are kept as a reference of the same logic
-> as a custom resource — Alchemy v2 isn't installable from npm yet (see
-> `infra/README.md`).
+> The Alchemy v2 path uses local state (no Cloudflare). Pin `alchemy` to exactly
+> `2.0.0-beta.52` with `effect@^4` — see `infra/README.md`. Prefer no deps?
+> `bun run deploy:script` does the same build/sync/restart via `deploy.ts`.
 
 ## Authoring widgets
 
@@ -84,6 +84,5 @@ runtime pushes the diff to the device.
 - The custom-resource deploy needs the SSH add-on with Protection mode off.
   The more locked-down alternative is GitOps: publish `addon/` as a GitHub
   add-on repository and install/update from the HA store.
-- Alchemy v2 isn't installable from npm yet (the current publish is a broken
-  pipeline build), so the deploy runs via `deploy.ts` today; the custom-resource
-  version is reference code for when v2 ships.
+- Alchemy v2 is in beta — pin `alchemy` to exactly `2.0.0-beta.52` (a caret
+  range resolves to a broken interim build) and use Effect 4.
