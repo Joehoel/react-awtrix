@@ -46,6 +46,10 @@ interface EntityState {
 interface AddonOptions {
   awtrix_host?: string;
   awtrix_mqtt_prefix?: string;
+  mqtt_host?: string;
+  mqtt_port?: number;
+  mqtt_username?: string;
+  mqtt_password?: string;
 }
 
 function readOptions(): AddonOptions {
@@ -68,7 +72,13 @@ async function getMqttBrokerConfig(): Promise<MqttBrokerConfig | null> {
     });
 
     if (!response.ok) {
-      console.warn(`[discover] MQTT service responded with ${response.status}`);
+      let body = "";
+      try {
+        body = await response.text();
+      } catch {}
+      console.warn(
+        `[discover] MQTT service responded with ${response.status}: ${body || "(empty body)"}`,
+      );
       return null;
     }
 
@@ -169,6 +179,25 @@ function buildBrokerUrl(config: MqttBrokerConfig): string {
   return `${protocol}://${auth}${config.host}:${config.port}`;
 }
 
+/**
+ * Try to get MQTT broker config from direct addon options (mqtt_host, etc.).
+ * Returns null if mqtt_host is not configured.
+ */
+function getDirectMqttConfig(options: AddonOptions): MqttBrokerConfig | null {
+  const host = options.mqtt_host || undefined;
+  if (host === undefined) {
+    return null;
+  }
+
+  return {
+    host,
+    port: options.mqtt_port ?? 1883,
+    username: options.mqtt_username ?? "",
+    password: options.mqtt_password ?? "",
+    ssl: false,
+  };
+}
+
 export async function resolveProtocol(): Promise<AwtrixProtocol> {
   const options = readOptions();
   const explicitPrefix = options.awtrix_mqtt_prefix || undefined;
@@ -177,12 +206,13 @@ export async function resolveProtocol(): Promise<AwtrixProtocol> {
   // 1. If explicit MQTT prefix is configured, use it directly.
   if (explicitPrefix !== undefined) {
     console.log(`[discover] Using configured MQTT prefix: ${explicitPrefix}`);
-    const broker = await getMqttBrokerConfig();
+    const broker = await getMqttBrokerConfig() ?? getDirectMqttConfig(options);
 
     if (broker === null) {
       throw new Error(
-        "[discover] awtrix_mqtt_prefix is set but MQTT service is unavailable. " +
-          "Install the Mosquitto broker add-on or remove awtrix_mqtt_prefix to use HTTP.",
+        "[discover] awtrix_mqtt_prefix is set but no MQTT broker available. " +
+          "Configure mqtt_host/mqtt_port/mqtt_username/mqtt_password, or " +
+          "install the Mosquitto broker add-on.",
       );
     }
 
@@ -192,7 +222,7 @@ export async function resolveProtocol(): Promise<AwtrixProtocol> {
   }
 
   // 2. Try auto-discovery via MQTT + device registry.
-  const broker = await getMqttBrokerConfig();
+  const broker = await getMqttBrokerConfig() ?? getDirectMqttConfig(options);
 
   if (broker !== null) {
     console.log(`[discover] MQTT broker available at ${broker.host}:${broker.port}`);
@@ -224,7 +254,7 @@ export async function resolveProtocol(): Promise<AwtrixProtocol> {
       "[discover] Ensure HA_DISCOVERY is enabled on your AWTRIX device and it's connected to the same MQTT broker.",
     );
   } else {
-    console.warn("[discover] MQTT service not available.");
+    console.warn("[discover] MQTT service not available (Supervisor API failed and no direct mqtt_host configured).");
   }
 
   // 3. Fall back to HTTP if awtrix_host is configured.
@@ -243,7 +273,7 @@ export async function resolveProtocol(): Promise<AwtrixProtocol> {
   throw new Error(
     "[discover] No AWTRIX device found. Either:\n" +
       "  1. Install Mosquitto broker add-on and enable HA_DISCOVERY on your AWTRIX device, or\n" +
-      "  2. Set the awtrix_mqtt_prefix option, or\n" +
+      "  2. Set the awtrix_mqtt_prefix option (plus mqtt_host if Supervisor API is blocked), or\n" +
       "  3. Set the awtrix_host option for HTTP fallback.",
   );
 }
