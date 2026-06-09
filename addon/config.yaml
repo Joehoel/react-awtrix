@@ -19,6 +19,8 @@ init: false
 # This is what lets the add-on talk to Home Assistant with zero configured tokens.
 homeassistant_api: true
 options:
-  awtrix_host: "192.168.1.45"
+  awtrix_host: ""
+  awtrix_mqtt_prefix: ""
 schema:
-  awtrix_host: str
+  awtrix_host: "str?"
+  awtrix_mqtt_prefix: "str?"

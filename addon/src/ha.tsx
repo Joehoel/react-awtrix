@@ -17,6 +17,11 @@ let entities: HassEntities = {};
 let connection: Connection | undefined;
 const listeners = new Set<() => void>();
 
+let resolveConnectionPromise: (connection: Connection) => void;
+const connectionPromise = new Promise<Connection>((resolve) => {
+  resolveConnectionPromise = resolve;
+});
+
 function emit(): void {
   for (const listener of listeners) {
     listener();
@@ -54,6 +59,7 @@ async function connect(): Promise<void> {
   for (let attempt = 1; ; attempt++) {
     try {
       connection = await createConnection({ auth: resolveAuth() });
+      resolveConnectionPromise(connection);
       subscribeEntities(connection, (next) => {
         entities = next;
         emit();
@@ -95,4 +101,9 @@ export async function callHassService(
   }
 
   return callService(connection, domain, service, serviceData, target);
+}
+
+/** Wait for the Home Assistant WebSocket connection to be established. */
+export function getConnection(): Promise<Connection> {
+  return connectionPromise;
 }
