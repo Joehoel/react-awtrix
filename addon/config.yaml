@@ -21,7 +21,7 @@ homeassistant_api: true
 # Grants access to the Supervisor API (http://supervisor/services/mqtt, etc.)
 # so the add-on can discover the MQTT broker configuration automatically.
 hassio_api: true
-hassio_role: default
+hassio_role: manager
 options:
   awtrix_host: ""
   awtrix_mqtt_prefix: ""
