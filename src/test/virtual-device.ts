@@ -273,7 +273,7 @@ function readColorValue(value: unknown): number | undefined {
 }
 
 function readStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) {
+  if (!isUnknownArray(value)) {
     return undefined;
   }
 
@@ -289,10 +289,14 @@ function readStringArray(value: unknown): string[] | undefined {
   return result;
 }
 
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
+}
+
 function parseAppVectorUpdate(value: unknown): AppVectorUpdateItem[] | undefined {
   const rawItems: unknown[] = [];
 
-  if (Array.isArray(value)) {
+  if (isUnknownArray(value)) {
     rawItems.push(...value);
   } else if (isObject(value)) {
     rawItems.push(value);
@@ -431,7 +435,7 @@ export class VirtualAwtrixDevice {
 
     const serverPort = this.server.port;
     if (serverPort === undefined) {
-      this.server.stop();
+      void this.server.stop();
       throw new Error("VirtualAwtrixDevice failed to bind to a port.");
     }
 
@@ -448,7 +452,7 @@ export class VirtualAwtrixDevice {
     }
 
     this.stopped = true;
-    this.server.stop();
+    void this.server.stop();
 
     for (const waiter of this.waiters) {
       clearTimeout(waiter.timeout);
@@ -1135,7 +1139,7 @@ export class VirtualAwtrixDevice {
       return textResponse("OK", 200);
     }
 
-    if (Array.isArray(parsedBody.value)) {
+    if (isUnknownArray(parsedBody.value)) {
       const payloadArray: AwtrixPayload[] = [];
 
       for (let index = 0; index < parsedBody.value.length; index += 1) {

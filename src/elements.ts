@@ -14,8 +14,6 @@ import type { AwtrixContainer, AwtrixInstance, AwtrixNode } from "./render-tree.
 
 export type ElementType = "pixel" | "line" | "rect" | "circle" | "text" | "bitmap" | "app";
 
-type PropsParser = (props: unknown) => AwtrixInstance["props"];
-
 const elementDefinitions = [
   { type: "app", hostTag: "awtrix-app", parseProps: parseAppProps },
   { type: "pixel", hostTag: "awtrix-pixel", parseProps: parsePixelProps },
@@ -27,16 +25,12 @@ const elementDefinitions = [
 ] as const satisfies ReadonlyArray<{
   type: ElementType;
   hostTag: string;
-  parseProps: PropsParser;
+  parseProps: (props: unknown) => AwtrixInstance["props"];
 }>;
 
 const hostElementTypeMap = new Map<string, ElementType>(
   elementDefinitions.map((definition) => [definition.hostTag, definition.type]),
 );
-
-const parsers = Object.fromEntries(
-  elementDefinitions.map((definition) => [definition.type, definition.parseProps]),
-) as Record<ElementType, PropsParser>;
 
 const APP_PAYLOAD_MERGE_KEYS = [
   "icon",
@@ -73,16 +67,41 @@ export function resolveElementType(value: string): ElementType | undefined {
 }
 
 export function parseElementProps(type: ElementType, props: unknown): AwtrixInstance["props"] {
-  return parsers[type](props);
+  switch (type) {
+    case "app":
+      return parseAppProps(props);
+    case "pixel":
+      return parsePixelProps(props);
+    case "line":
+      return parseLineProps(props);
+    case "rect":
+      return parseRectProps(props);
+    case "circle":
+      return parseCircleProps(props);
+    case "text":
+      return parseTextProps(props);
+    case "bitmap":
+      return parseBitmapProps(props);
+  }
 }
 
 export function createElementInstance(type: ElementType, props: unknown): AwtrixInstance {
-  return {
-    type,
-    props: parseElementProps(type, props),
-    children: [],
-    hidden: false,
-  } as AwtrixInstance;
+  switch (type) {
+    case "app":
+      return { type, props: parseAppProps(props), children: [], hidden: false };
+    case "pixel":
+      return { type, props: parsePixelProps(props), children: [], hidden: false };
+    case "line":
+      return { type, props: parseLineProps(props), children: [], hidden: false };
+    case "rect":
+      return { type, props: parseRectProps(props), children: [], hidden: false };
+    case "circle":
+      return { type, props: parseCircleProps(props), children: [], hidden: false };
+    case "text":
+      return { type, props: parseTextProps(props), children: [], hidden: false };
+    case "bitmap":
+      return { type, props: parseBitmapProps(props), children: [], hidden: false };
+  }
 }
 
 export function updateElementInstance(instance: AwtrixInstance, nextProps: unknown): void {
@@ -97,14 +116,14 @@ export function mergeElementPayload(target: AppPayload, instance: AwtrixInstance
   for (const key of APP_PAYLOAD_MERGE_KEYS) {
     const value = instance.props[key];
     if (value !== undefined) {
-      (target as Record<string, unknown>)[key] = value;
+      Object.assign(target, { [key]: value });
     }
   }
 
   for (const key of APP_PAYLOAD_COLOR_KEYS) {
     const value = instance.props[key];
     if (value !== undefined) {
-      (target as Record<string, unknown>)[key] = normalizeColor(value);
+      Object.assign(target, { [key]: normalizeColor(value) });
     }
   }
 }
@@ -205,7 +224,7 @@ export function serializeElement(
       };
 
     case "rect": {
-      if (instance.props.filled) {
+      if (instance.props.filled === true) {
         const clipped = clipFilledRect(
           instance.props.x,
           instance.props.y,
@@ -241,7 +260,7 @@ export function serializeElement(
     }
 
     case "circle":
-      if (instance.props.filled) {
+      if (instance.props.filled === true) {
         return {
           dfc: [
             instance.props.x,

@@ -66,32 +66,36 @@ function scheduleFlush(container: AwtrixContainer): void {
     clearTimeout(container.pendingFlush);
   }
 
-  container.pendingFlush = setTimeout(async () => {
-    container.pendingFlush = undefined;
-
-    const payload = serialize(container);
-
-    if (container.debug) {
-      console.log(
-        `[react-awtrix] ${container.mode === "notify" ? "notify" : container.appName} →`,
-        JSON.stringify(payload, null, 2),
-      );
-    }
-
-    try {
-      await container.requestFlush(payload);
-
-      if (container.onFlush !== undefined) {
-        container.onFlush();
-      }
-    } catch (err) {
-      console.error("[react-awtrix] Flush failed:", err);
-
-      if (container.onFlushError !== undefined) {
-        container.onFlushError(err);
-      }
-    }
+  container.pendingFlush = setTimeout(() => {
+    void flushContainer(container);
   }, container.debounceMs);
+}
+
+async function flushContainer(container: AwtrixContainer): Promise<void> {
+  container.pendingFlush = undefined;
+
+  const payload = serialize(container);
+
+  if (container.debug) {
+    console.log(
+      `[react-awtrix] ${container.mode === "notify" ? "notify" : container.appName} →`,
+      JSON.stringify(payload, null, 2),
+    );
+  }
+
+  try {
+    await container.requestFlush(payload);
+
+    if (container.onFlush !== undefined) {
+      container.onFlush();
+    }
+  } catch (err) {
+    console.error("[react-awtrix] Flush failed:", err);
+
+    if (container.onFlushError !== undefined) {
+      container.onFlushError(err);
+    }
+  }
 }
 
 // ─── Child list helpers ────────────────────────────────────────────────────
@@ -367,9 +371,16 @@ export function createReconcilerRoot(
     false, // isStrictMode
     null, // concurrentUpdatesByDefaultOverride
     tag, // identifierPrefix
-    onUncaughtError ?? ((err) => console.error("[react-awtrix] Uncaught:", err)),
-    (err) => console.error("[react-awtrix] Caught:", err),
-    (err) => console.error("[react-awtrix] Recoverable:", err),
+    onUncaughtError ??
+      ((err) => {
+        console.error("[react-awtrix] Uncaught:", err);
+      }),
+    (err) => {
+      console.error("[react-awtrix] Caught:", err);
+    },
+    (err) => {
+      console.error("[react-awtrix] Recoverable:", err);
+    },
     () => {}, // onDefaultTransitionIndicator
   );
 }

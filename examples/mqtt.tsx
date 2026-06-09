@@ -34,7 +34,7 @@ function listenServer(server: ReturnType<typeof createServer>, port: number): Pr
 
     const onError = (error: unknown): void => {
       server.off("listening", onListening);
-      reject(error);
+      reject(error instanceof Error ? error : new Error(String(error)));
     };
 
     server.once("listening", onListening);

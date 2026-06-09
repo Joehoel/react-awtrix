@@ -8,6 +8,9 @@
     "style": "off"
   },
   "plugins": ["typescript", "react", "import", "unicorn", "oxc"],
+  "options": {
+    "typeAware": true
+  },
   "rules": {
     "no-console": "warn",
     "no-debugger": "error",

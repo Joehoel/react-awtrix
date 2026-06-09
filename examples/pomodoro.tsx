@@ -102,7 +102,8 @@ const handle = render(<PomodoroApp />, {
   debug: true,
 });
 
-process.on("SIGINT", async () => {
-  await handle.unmount();
-  process.exit(0);
+process.on("SIGINT", () => {
+  void handle.unmount().then(() => {
+    process.exit(0);
+  });
 });

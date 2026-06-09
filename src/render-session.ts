@@ -43,7 +43,7 @@ function createBaseRenderSession(
   onError: ((error: unknown) => void) | undefined,
 ): RenderSession {
   let disposed = false;
-  const root = createReconcilerRoot(container, identifierPrefix, onError);
+  const root: unknown = createReconcilerRoot(container, identifierPrefix, onError);
 
   function cancelPendingFlush(): void {
     if (container.pendingFlush !== undefined) {
@@ -133,7 +133,9 @@ export function createAppRenderSession(options: AppRenderSessionOptions): AppRen
       return unmountPromise;
     },
 
-    cancelPendingFlush: session.cancelPendingFlush,
+    cancelPendingFlush() {
+      session.cancelPendingFlush();
+    },
   };
 }
 
@@ -180,6 +182,8 @@ export function createNotifyRenderSession(options: NotifyRenderSessionOptions): 
       session.unmount();
     },
 
-    cancelPendingFlush: session.cancelPendingFlush,
+    cancelPendingFlush() {
+      session.cancelPendingFlush();
+    },
   };
 }

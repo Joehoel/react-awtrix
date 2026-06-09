@@ -117,7 +117,7 @@ export class DeviceTransport {
   private async drainLoop(): Promise<void> {
     while (!this.disposed) {
       const iteratorResult = this.pending.entries().next();
-      if (iteratorResult.done) {
+      if (iteratorResult.done === true) {
         break;
       }
 

@@ -113,6 +113,10 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
  */
 const DEFAULT_NOTIFY_TIMEOUT = 5000;
 
+function toError(value: unknown): Error {
+  return value instanceof Error ? value : new Error(String(value));
+}
+
 export function notify(element: ReactNode, options: NotifyOptions): Promise<void> {
   const protocol = resolveProtocol(options);
   const timeoutMs = options.timeout ?? DEFAULT_NOTIFY_TIMEOUT;
@@ -151,7 +155,7 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
         if (completed) return;
         completed = true;
         cleanup();
-        reject(error);
+        reject(toError(error));
       },
       requestFlush: async (payload) => {
         await protocol.pushNotify(payload);
@@ -161,7 +165,7 @@ export function notify(element: ReactNode, options: NotifyOptions): Promise<void
         if (!completed) {
           completed = true;
           cleanup();
-          reject(error);
+          reject(toError(error));
         }
       },
     });

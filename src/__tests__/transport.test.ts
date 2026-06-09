@@ -132,8 +132,9 @@ describe("DeviceTransport", () => {
         calls.push(`push:${name}`);
         await firstSendGate.promise;
       },
-      async deleteApp(name) {
+      deleteApp(name) {
         calls.push(`delete:${name}`);
+        return Promise.resolve();
       },
     };
 
@@ -157,11 +158,12 @@ describe("DeviceTransport", () => {
     const calls: string[] = [];
 
     const client: TransportClient = {
-      async pushApp(name, _payload) {
+      pushApp(name, _payload) {
         calls.push(name);
         if (name === "bad") {
-          throw new Error("boom");
+          return Promise.reject(new Error("boom"));
         }
+        return Promise.resolve();
       },
       deleteApp(_name) {
         return Promise.resolve();
@@ -173,8 +175,18 @@ describe("DeviceTransport", () => {
       minIntervalMs: 0,
     });
 
-    await expect(transport.enqueuePush("bad", createPayload("X"))).rejects.toThrow("boom");
-    await expect(transport.enqueuePush("good", createPayload("Y"))).resolves.toBeUndefined();
+    try {
+      await transport.enqueuePush("bad", createPayload("X"));
+      throw new Error("Expected bad push to reject.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      expect(error.message).toBe("boom");
+    }
+
+    await transport.enqueuePush("good", createPayload("Y"));
 
     expect(calls).toEqual(["bad", "good"]);
   });

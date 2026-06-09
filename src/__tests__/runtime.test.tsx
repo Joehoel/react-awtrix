@@ -218,13 +218,15 @@ describe("runtime", () => {
     const protocol: AwtrixProtocol = {
       kind: "mock",
       key: "mock:runtime",
-      pushApp: async (name, payload) => {
+      pushApp: (name, payload) => {
         pushed.push({ name, text: payload.text });
+        return Promise.resolve();
       },
-      deleteApp: async (name) => {
+      deleteApp: (name) => {
         deleted.push(name);
+        return Promise.resolve();
       },
-      pushNotify: async (_payload) => {},
+      pushNotify: (_payload) => Promise.resolve(),
     };
 
     const runtime = createRuntime({
@@ -249,17 +251,17 @@ describe("runtime", () => {
     const firstProtocol: AwtrixProtocol = {
       kind: "mock",
       key: "mock:shared-runtime-key",
-      pushApp: async (_name, _payload) => {},
-      deleteApp: async (_name) => {},
-      pushNotify: async (_payload) => {},
+      pushApp: (_name, _payload) => Promise.resolve(),
+      deleteApp: (_name) => Promise.resolve(),
+      pushNotify: (_payload) => Promise.resolve(),
     };
 
     const secondProtocol: AwtrixProtocol = {
       kind: "mock",
       key: "mock:shared-runtime-key",
-      pushApp: async (_name, _payload) => {},
-      deleteApp: async (_name) => {},
-      pushNotify: async (_payload) => {},
+      pushApp: (_name, _payload) => Promise.resolve(),
+      deleteApp: (_name) => Promise.resolve(),
+      pushNotify: (_payload) => Promise.resolve(),
     };
 
     const first = createRuntime({ protocol: firstProtocol });

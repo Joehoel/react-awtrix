@@ -4,6 +4,7 @@ import { http } from "../protocols/http.ts";
 import { createRuntime } from "../runtime.ts";
 import { createVirtualAwtrixDevice, type VirtualAwtrixDevice } from "../test/virtual-device.ts";
 import type { Runtime } from "../api.ts";
+import type * as RuntimeModule from "../runtime.ts";
 
 interface HmrTestContext {
   device: VirtualAwtrixDevice;
@@ -18,6 +19,10 @@ function appWithText(text: string) {
       </Text>
     </App>
   );
+}
+
+function importRuntimeModule(specifier: string): Promise<typeof RuntimeModule> {
+  return import(specifier);
 }
 
 describe("runtime HMR", () => {
@@ -99,14 +104,14 @@ describe("runtime HMR", () => {
       hmr: true,
     };
 
-    const moduleA = await import(`../runtime.ts?module-a-${Date.now()}`);
+    const moduleA = await importRuntimeModule(`../runtime.ts?module-a-${Date.now()}`);
     const runtimeA = moduleA.createRuntime(options);
 
     runtimeA.app("clock", appWithText("OLD-CLOCK"));
     runtimeA.app("weather", appWithText("WX"));
     await device.waitForCustomRequestCount(2, 2000);
 
-    const moduleB = await import(`../runtime.ts?module-b-${Date.now()}`);
+    const moduleB = await importRuntimeModule(`../runtime.ts?module-b-${Date.now()}`);
     const runtimeB = moduleB.createRuntime(options);
 
     context = {
@@ -143,8 +148,9 @@ describe("runtime HMR", () => {
       },
       applyOptions() {},
       startHmrPass() {},
-      async dispose() {
+      dispose() {
         legacyDisposeCalls += 1;
+        return Promise.resolve();
       },
     };
 

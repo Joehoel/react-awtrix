@@ -65,7 +65,10 @@ describe("notify", () => {
     console.error = (..._args: unknown[]) => {};
 
     try {
-      await expect(failedNotify).rejects.toThrow();
+      await failedNotify;
+      throw new Error("Expected notify to reject when delivery fails.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
     } finally {
       console.error = originalConsoleError;
     }

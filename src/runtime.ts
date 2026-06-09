@@ -19,9 +19,7 @@ declare global {
 }
 
 function runtimeRegistry(): Map<string, AwtrixRuntimeImpl> {
-  if (globalThis.__react_awtrix_runtime_registry__ === undefined) {
-    globalThis.__react_awtrix_runtime_registry__ = new Map();
-  }
+  globalThis.__react_awtrix_runtime_registry__ ??= new Map();
 
   return globalThis.__react_awtrix_runtime_registry__;
 }
@@ -114,9 +112,7 @@ class AwtrixRuntimeImpl implements Runtime {
       return;
     }
 
-    if (this.hmrSeenApps === undefined) {
-      this.hmrSeenApps = new Set();
-    }
+    this.hmrSeenApps ??= new Set();
 
     if (this.hmrPruneScheduled) {
       return;
@@ -360,7 +356,9 @@ class AwtrixRuntimeImpl implements Runtime {
       height: this.matrixHeight,
       debug: this.debug,
       debounceMs: this.debounceMs,
-      onError: (error) => this.reportError(name, error),
+      onError: (error) => {
+        this.reportError(name, error);
+      },
       requestFlush: async (payload) => {
         if (this.disposed || !this.entries.has(name)) {
           return;
@@ -453,15 +451,26 @@ class AwtrixRuntimeImpl implements Runtime {
   }
 }
 
-function disposeLegacyRuntime(existingRuntime: unknown): void {
-  const disposeMethod = Reflect.get(existingRuntime as object, "dispose");
+interface LegacyRuntimeLike {
+  dispose(): unknown;
+}
 
-  if (typeof disposeMethod !== "function") {
+function hasLegacyDispose(value: unknown): value is LegacyRuntimeLike {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "dispose" in value &&
+    typeof value.dispose === "function"
+  );
+}
+
+function disposeLegacyRuntime(existingRuntime: unknown): void {
+  if (!hasLegacyDispose(existingRuntime)) {
     return;
   }
 
   try {
-    const disposeResult = disposeMethod.call(existingRuntime);
+    const disposeResult = existingRuntime.dispose();
 
     if (disposeResult instanceof Promise) {
       void disposeResult.catch((error: unknown) => {

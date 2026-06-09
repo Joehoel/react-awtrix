@@ -87,9 +87,15 @@ describe("reconciler integration", () => {
       const [value, setValue] = useState(0);
 
       useEffect(() => {
-        const timerA = setTimeout(() => setValue(1), 0);
-        const timerB = setTimeout(() => setValue(2), 5);
-        const timerC = setTimeout(() => setValue(3), 10);
+        const timerA = setTimeout(() => {
+          setValue(1);
+        }, 0);
+        const timerB = setTimeout(() => {
+          setValue(2);
+        }, 5);
+        const timerC = setTimeout(() => {
+          setValue(3);
+        }, 10);
 
         return () => {
           clearTimeout(timerA);
@@ -125,8 +131,12 @@ describe("reconciler integration", () => {
       const [tick, setTick] = useState(0);
 
       useEffect(() => {
-        const first = setTimeout(() => setTick(1), 20);
-        const second = setTimeout(() => setTick(2), 40);
+        const first = setTimeout(() => {
+          setTick(1);
+        }, 20);
+        const second = setTimeout(() => {
+          setTick(2);
+        }, 40);
 
         return () => {
           clearTimeout(first);
@@ -168,9 +178,15 @@ describe("reconciler integration", () => {
       }, [frame]);
 
       useEffect(() => {
-        const first = setTimeout(() => setFrame(1), 10);
-        const second = setTimeout(() => setMode("live"), 20);
-        const third = setTimeout(() => setFrame(2), 30);
+        const first = setTimeout(() => {
+          setFrame(1);
+        }, 10);
+        const second = setTimeout(() => {
+          setMode("live");
+        }, 20);
+        const third = setTimeout(() => {
+          setFrame(2);
+        }, 30);
 
         return () => {
           clearTimeout(first);

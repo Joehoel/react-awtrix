@@ -24,13 +24,15 @@ describe("renderer protocol options", () => {
     const protocol: AwtrixProtocol = {
       kind: "mock",
       key: "mock:renderer",
-      pushApp: async (name, payload) => {
+      pushApp: (name, payload) => {
         pushed.push({ name, payload });
+        return Promise.resolve();
       },
-      deleteApp: async (name) => {
+      deleteApp: (name) => {
         deleted.push(name);
+        return Promise.resolve();
       },
-      pushNotify: async (_payload) => {},
+      pushNotify: (_payload) => Promise.resolve(),
     };
 
     const handle = render(
@@ -65,10 +67,11 @@ describe("renderer protocol options", () => {
     const protocol: AwtrixProtocol = {
       kind: "mock",
       key: "mock:notify",
-      pushApp: async (_name, _payload) => {},
-      deleteApp: async (_name) => {},
-      pushNotify: async (payload) => {
+      pushApp: (_name, _payload) => Promise.resolve(),
+      deleteApp: (_name) => Promise.resolve(),
+      pushNotify: (payload) => {
         notifications.push(payload);
+        return Promise.resolve();
       },
     };
 

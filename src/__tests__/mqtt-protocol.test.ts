@@ -146,9 +146,16 @@ describe("mqtt protocol", () => {
 
     expect(endCalls).toEqual([1]);
     expect(subscriptions).toEqual([]);
-    await expect(protocol.pushNotify({ text: "late" })).rejects.toThrow(
-      "MQTT protocol is disposed",
-    );
+    try {
+      await protocol.pushNotify({ text: "late" });
+      throw new Error("Expected pushNotify to reject after disposal.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      expect(error.message).toContain("MQTT protocol is disposed");
+    }
   });
 
   test("subscribes to mqtt stats topics and emits runtime events", async () => {

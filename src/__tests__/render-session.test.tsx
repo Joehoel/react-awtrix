@@ -33,10 +33,11 @@ describe("AppRenderSession", () => {
       appName: "session-test",
       identifierPrefix: "session-test",
       debounceMs: 0,
-      requestFlush: async (payload) => {
+      requestFlush: (payload) => {
         pushed.push(payload);
+        return Promise.resolve();
       },
-      requestDelete: async () => {},
+      requestDelete: () => Promise.resolve(),
     });
 
     session.update(textApp("Hi"));
@@ -57,11 +58,13 @@ describe("AppRenderSession", () => {
       appName: "debounced-session",
       identifierPrefix: "debounced-session",
       debounceMs: 100,
-      requestFlush: async (payload) => {
+      requestFlush: (payload) => {
         pushed.push(payload);
+        return Promise.resolve();
       },
-      requestDelete: async () => {
+      requestDelete: () => {
         deleted.push("debounced-session");
+        return Promise.resolve();
       },
     });
 
@@ -82,11 +85,13 @@ describe("AppRenderSession", () => {
       appName: "idempotent-session",
       identifierPrefix: "idempotent-session",
       debounceMs: 0,
-      requestFlush: async (payload) => {
+      requestFlush: (payload) => {
         pushed.push(payload);
+        return Promise.resolve();
       },
-      requestDelete: async () => {
+      requestDelete: () => {
         deleted.push("idempotent-session");
+        return Promise.resolve();
       },
     });
 
@@ -110,8 +115,9 @@ describe("NotifyRenderSession", () => {
         hold: true,
         sound: "ding",
       },
-      requestFlush: async (payload) => {
+      requestFlush: (payload) => {
         pushed.push(payload);
+        return Promise.resolve();
       },
       onFlush() {
         flushed = true;
@@ -140,9 +146,7 @@ describe("NotifyRenderSession", () => {
 
     try {
       const session = createNotifyRenderSession({
-        requestFlush: async () => {
-          throw expectedError;
-        },
+        requestFlush: () => Promise.reject(expectedError),
         onFlushError(error) {
           flushError = error;
         },
@@ -163,8 +167,9 @@ describe("NotifyRenderSession", () => {
     const pushed: AwtrixPayload[] = [];
 
     const session = createNotifyRenderSession({
-      requestFlush: async (payload) => {
+      requestFlush: (payload) => {
         pushed.push(payload);
+        return Promise.resolve();
       },
     });
 

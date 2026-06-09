@@ -5,6 +5,7 @@
     "target": "ESNext",
     "jsx": "react-jsx",
     "allowImportingTsExtensions": true,
+    "types": ["bun"],
 
     "noFallthroughCasesInSwitch": true,
 

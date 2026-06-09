@@ -54,15 +54,14 @@
   },
   "scripts": {
     "build": "tsdown",
-    "prepare": "lefthook install",
     "test": "bun test",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "knip": "knip",
-    "check": "bun run typecheck && bun run lint && bun run format:check && bun run knip",
+    "prepush": "bun run typecheck && bun run lint:fix && bun run format && bun run knip --fix",
     "example:hello": "bun run examples/hello.tsx",
     "example:clock": "bun run examples/clock.tsx",
     "example:progress": "bun run examples/progress.tsx",
@@ -85,15 +84,16 @@
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
     "@types/react-reconciler": "^0.33.0",
+    "@typescript/native-preview": "latest",
     "knip": "^5.85.0",
-    "lefthook": "^1.7.0",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
+    "oxlint-tsgolint": "^0.23.0",
     "publint": "^0.3.18",
     "tsdown": "^0.21.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
-    "typescript": "^5"
+    "typescript": ">=5 <8"
   }
 }
