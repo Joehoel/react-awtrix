@@ -21,6 +21,11 @@ report.*.json
 .env.*
 !.env.example
 
+# add-on build output + alchemy state
+addon/staging/
+addon/main.js
+.alchemy/
+
 # caches
 .cache/
 .eslintcache

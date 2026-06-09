@@ -19,16 +19,16 @@ jobs:
       - run: bun install --frozen-lockfile
 
       - name: Typecheck
-        run: bun run typecheck
+        run: bun run --filter react-awtrix typecheck
 
       - name: Lint
-        run: bun run lint
+        run: bun run --filter react-awtrix lint
 
       - name: Format
-        run: bun run format:check
+        run: bun run --filter react-awtrix format:check
 
       - name: Unused code
-        run: bun run knip
+        run: bun run --filter react-awtrix knip
 
       - name: Test
-        run: bun test
+        run: bun run --filter react-awtrix test

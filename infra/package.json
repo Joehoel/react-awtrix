@@ -1,0 +1,18 @@
+{
+  "name": "react-awtrix-infra",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "alchemy deploy",
+    "plan": "alchemy plan",
+    "destroy": "alchemy destroy"
+  },
+  "dependencies": {
+    "effect": "^4.0.0-beta.78"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "alchemy": "2.0.0-beta.52"
+  }
+}

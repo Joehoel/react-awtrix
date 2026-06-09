@@ -1,0 +1,6 @@
+# Base image per architecture. oven/bun is multi-arch, so the same tag works for
+# both; the builder/Supervisor selects the right platform. Used by HA local
+# builds and the CI builder (passed to the Dockerfile as BUILD_FROM).
+build_from:
+  aarch64: "oven/bun:1-alpine"
+  amd64: "oven/bun:1-alpine"

@@ -1,0 +1,6 @@
+# Marks this repo as a Home Assistant add-on repository. Add its URL in
+# Home Assistant: Settings -> Add-ons -> Add-on Store -> ⋮ -> Repositories.
+# The add-on itself lives in ./addon (see docs/HOMEASSISTANT_DEPLOY.md).
+name: react-awtrix add-ons
+url: "https://github.com/Joehoel/react-awtrix"
+maintainer: "Joel Kuijper <jmkuijper@gmail.com>"

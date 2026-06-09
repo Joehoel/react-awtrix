@@ -1,0 +1,15 @@
+{
+  "extends": "@total-typescript/tsconfig/bundler/no-dom",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "paths": {
+      "react-awtrix": ["../packages/react-awtrix/src/index.ts"]
+    }
+  },
+  "include": ["src", "build.ts", "../packages/react-awtrix/src/jsx.d.ts"]
+}
