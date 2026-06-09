@@ -17,21 +17,22 @@ addon/
 └─ staging/         # build output, rsynced to /addons/react_awtrix (gitignored)
 ```
 
-## Local development
+## Local development (fast inner loop)
 
-`react-awtrix` is resolved from the parent repo source (see `tsconfig.json`
-`paths`), so you only install the runtime deps here:
+Run the runtime on your machine with hot reload, pointed at the real AWTRIX and
+Home Assistant on your LAN. Edit a component, save, watch the pixels update.
 
 ```bash
 cd addon
 bun install
-AWTRIX_HOST=192.168.1.45 HASS_URL=http://homeassistant.local:8123 \
-  HASS_TOKEN=<long-lived-token> bun run dev
+cp .env.example .env   # set AWTRIX_HOST, HASS_URL, HASS_TOKEN
+bun run dev            # bun --hot src/main.tsx
 ```
 
-> For local dev outside the Supervisor there is no `SUPERVISOR_TOKEN`. Either
-> point `ha.tsx` at `createLongLivedTokenAuth(HASS_URL, HASS_TOKEN)`, or just run
-> it inside the add-on where the proxy is available.
+`ha.tsx` uses `SUPERVISOR_TOKEN` when running as an add-on, and falls back to
+`HASS_URL` + `HASS_TOKEN` (a long-lived token) for local dev — the same code
+runs in both places. `react-awtrix` is resolved from the parent repo source via
+the `tsconfig.json` `paths` alias, so no publishing is needed.
 
 ## Build the deployable bundle
 

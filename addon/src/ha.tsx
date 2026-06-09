@@ -5,7 +5,12 @@
 // ws://supervisor/core/websocket with that token: no long-lived token to
 // generate, nothing exposed on the network.
 import { useSyncExternalStore } from "react";
-import { callService, createConnection, subscribeEntities } from "home-assistant-js-websocket";
+import {
+  callService,
+  createConnection,
+  createLongLivedTokenAuth,
+  subscribeEntities,
+} from "home-assistant-js-websocket";
 import type { Auth, Connection, HassEntities, HassEntity } from "home-assistant-js-websocket";
 
 let entities: HassEntities = {};
@@ -18,28 +23,37 @@ function emit(): void {
   }
 }
 
-function supervisorAuth(): Auth {
-  const token = process.env.SUPERVISOR_TOKEN;
-  if (token === undefined) {
-    throw new Error(
-      "SUPERVISOR_TOKEN is missing. Set `homeassistant_api: true` in config.yaml, " +
-        "or run locally with HASS_URL/HASS_TOKEN and swap this for createLongLivedTokenAuth.",
-    );
+function resolveAuth(): Auth {
+  // As an add-on (homeassistant_api: true), the Supervisor injects
+  // SUPERVISOR_TOKEN and proxies Core internally — no token to manage.
+  const supervisorToken = process.env.SUPERVISOR_TOKEN;
+  if (supervisorToken !== undefined) {
+    // Duck-typed Auth: the client only needs wsUrl + accessToken for the proxy.
+    return {
+      wsUrl: "ws://supervisor/core/websocket",
+      accessToken: supervisorToken,
+      expired: false,
+      async refreshAccessToken() {},
+    } as unknown as Auth;
   }
 
-  // Duck-typed Auth: the client only needs wsUrl + accessToken to dial the proxy.
-  return {
-    wsUrl: "ws://supervisor/core/websocket",
-    accessToken: token,
-    expired: false,
-    async refreshAccessToken() {},
-  } as unknown as Auth;
+  // Local dev: long-lived token against a reachable HA instance.
+  const url = process.env.HASS_URL;
+  const token = process.env.HASS_TOKEN;
+  if (url !== undefined && token !== undefined) {
+    return createLongLivedTokenAuth(url, token);
+  }
+
+  throw new Error(
+    "No Home Assistant credentials. As an add-on, set `homeassistant_api: true` " +
+      "(SUPERVISOR_TOKEN is injected). For local dev, set HASS_URL and HASS_TOKEN.",
+  );
 }
 
 async function connect(): Promise<void> {
   for (let attempt = 1; ; attempt++) {
     try {
-      connection = await createConnection({ auth: supervisorAuth() });
+      connection = await createConnection({ auth: resolveAuth() });
       subscribeEntities(connection, (next) => {
         entities = next;
         emit();

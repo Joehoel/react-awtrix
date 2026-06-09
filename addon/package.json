@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "bun run build.ts",
-    "dev": "bun run src/main.tsx"
+    "dev": "bun --hot src/main.tsx"
   },
   "dependencies": {
     "arktype": "^2.2.0",

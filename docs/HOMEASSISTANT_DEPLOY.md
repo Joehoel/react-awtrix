@@ -46,6 +46,20 @@ dev machine ── alchemy deploy ──ssh──▶ Pi: rsync /addons + `ha add
 | `infra/HassAddon.ts`   | Alchemy v2 custom resource (reconcile/delete/read) |
 | `infra/deploy.ts`      | Zero-dependency Bun deploy script (same logic)     |
 
+## Development workflow
+
+Three tiers, fastest first:
+
+1. **Local hot-reload** (`cd addon && bun run dev`) — the runtime runs on your
+   machine against the real AWTRIX + HA over the LAN, with `bun --hot`. Tightest
+   loop; no Pi, no Docker. Auth via `HASS_URL`/`HASS_TOKEN` (see `addon/.env`).
+2. **On-device dev build** (`cd infra && bun run deploy:script`) — rsyncs your
+   working tree into `/addons` and the Supervisor builds + runs it as a real
+   add-on (exercises the container + `SUPERVISOR_TOKEN` path). No publish.
+3. **Permanent release** — bump `version` in `addon/config.yaml`, merge to
+   `main`; CI publishes the prebuilt image to GHCR and the store offers the
+   update.
+
 ## One-time setup on the Pi
 
 1. Install the **Advanced SSH & Web Terminal** add-on.
