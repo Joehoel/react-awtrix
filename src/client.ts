@@ -3,7 +3,7 @@
  * All methods throw on non-ok responses.
  */
 
-import type { AwtrixPayload } from "./types.ts";
+import type { AwtrixPayload } from "./payload.ts";
 
 function url(host: string, port: number, path: string): string {
   return `http://${host}:${port}${path}`;

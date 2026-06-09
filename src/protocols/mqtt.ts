@@ -1,5 +1,5 @@
 import { connect } from "mqtt";
-import type { AwtrixProtocol, AwtrixProtocolEventMap } from "../types.ts";
+import type { AwtrixProtocol, AwtrixProtocolEventMap } from "../protocol.ts";
 
 export interface MqttProtocolOptions {
   broker: string;

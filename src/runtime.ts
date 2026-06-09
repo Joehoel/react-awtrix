@@ -1,15 +1,10 @@
 import type { ReactNode } from "react";
+import type { AppHandle, Runtime, RuntimeOptions } from "./api.ts";
+import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./display.ts";
+import type { AwtrixProtocol, AwtrixProtocolEventMap } from "./protocol.ts";
 import { resolveProtocol } from "./protocols/resolve.ts";
 import { createAppRenderSession, type AppRenderSession } from "./render-session.ts";
-import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import { DeviceTransport } from "./transport.ts";
-import type {
-  AppHandle,
-  AwtrixProtocol,
-  AwtrixProtocolEventMap,
-  Runtime,
-  RuntimeOptions,
-} from "./types.ts";
 
 const moduleRuntimeOwner = Symbol("react-awtrix-runtime-owner");
 

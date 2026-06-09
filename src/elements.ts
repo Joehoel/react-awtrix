@@ -7,14 +7,10 @@ import {
   parseRectProps,
   parseTextProps,
 } from "./props.ts";
-import type {
-  AppPayload,
-  AwtrixContainer,
-  AwtrixInstance,
-  AwtrixNode,
-  DrawCommand,
-} from "./types.ts";
-import { DEFAULT_TEXT_CHAR_WIDTH, normalizeColor } from "./types.ts";
+import { DEFAULT_TEXT_CHAR_WIDTH, normalizeColor } from "./display.ts";
+import type { DrawCommand } from "./display.ts";
+import type { AppPayload } from "./payload.ts";
+import type { AwtrixContainer, AwtrixInstance, AwtrixNode } from "./render-tree.ts";
 
 export type ElementType = "pixel" | "line" | "rect" | "circle" | "text" | "bitmap" | "app";
 

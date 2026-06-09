@@ -3,7 +3,7 @@ import { App, Text } from "../components.tsx";
 import { http } from "../protocols/http.ts";
 import { createRuntime } from "../runtime.ts";
 import { createVirtualAwtrixDevice, type VirtualAwtrixDevice } from "../test/virtual-device.ts";
-import type { Runtime } from "../types.ts";
+import type { Runtime } from "../api.ts";
 
 interface HmrTestContext {
   device: VirtualAwtrixDevice;

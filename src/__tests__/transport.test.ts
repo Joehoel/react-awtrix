@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { DeviceTransport, type TransportClient } from "../transport.ts";
-import type { AwtrixPayload } from "../types.ts";
+import type { AwtrixPayload } from "../payload.ts";
 
 interface Deferred {
   promise: Promise<void>;

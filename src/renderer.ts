@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { resolveProtocol } from "./protocols/resolve.ts";
 import { createAppRenderSession, createNotifyRenderSession } from "./render-session.ts";
-import type { NotifyOptions, NotifyPayloadOptions, RenderHandle, RenderOptions } from "./types.ts";
+import type { NotifyOptions, RenderHandle, RenderOptions } from "./api.ts";
+import type { NotifyPayloadOptions } from "./payload.ts";
 
 function createOperationQueue(): (operation: () => Promise<void>) => Promise<void> {
   let chain: Promise<void> = Promise.resolve();

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { notify, render } from "../renderer.ts";
-import type { AwtrixPayload, NotifyOptions, RenderHandle, RenderOptions } from "../types.ts";
+import type { NotifyOptions, RenderHandle, RenderOptions } from "../api.ts";
+import type { AwtrixPayload } from "../payload.ts";
 import { createVirtualAwtrixDevice, type VirtualAwtrixDevice } from "./virtual-device.ts";
 
 export interface RenderTestContextOptions {

@@ -7,7 +7,7 @@ import type {
   PixelProps,
   RectProps,
   TextProps,
-} from "./types.ts";
+} from "./element-props.ts";
 
 interface AwtrixTextElementProps extends TextProps {
   children?: string | number | Array<string | number>;

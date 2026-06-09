@@ -1,5 +1,6 @@
 import { http } from "./http.ts";
-import type { AwtrixProtocol, NotifyOptions, RenderOptions, RuntimeOptions } from "../types.ts";
+import type { NotifyOptions, RenderOptions, RuntimeOptions } from "../api.ts";
+import type { AwtrixProtocol } from "../protocol.ts";
 
 type ProtocolOptions = RenderOptions | NotifyOptions | RuntimeOptions;
 

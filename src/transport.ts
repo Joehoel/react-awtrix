@@ -1,4 +1,5 @@
-import type { AwtrixPayload, AwtrixProtocol } from "./types.ts";
+import type { AwtrixPayload } from "./payload.ts";
+import type { AwtrixProtocol } from "./protocol.ts";
 
 interface PendingWaiter {
   resolve: () => void;

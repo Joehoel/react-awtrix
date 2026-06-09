@@ -1,11 +1,7 @@
 import { mergeElementPayload, serializeElement } from "./elements.ts";
-import type {
-  AppPayload,
-  AwtrixContainer,
-  AwtrixNode,
-  AwtrixPayload,
-  DrawCommand,
-} from "./types.ts";
+import type { DrawCommand } from "./display.ts";
+import type { AppPayload, AwtrixPayload } from "./payload.ts";
+import type { AwtrixContainer, AwtrixNode } from "./render-tree.ts";
 
 function collectText(children: AwtrixNode[]): string {
   let value = "";

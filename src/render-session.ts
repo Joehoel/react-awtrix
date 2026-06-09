@@ -1,12 +1,8 @@
 import type { ReactNode } from "react";
 import { createReconcilerRoot, reconciler } from "./reconciler.ts";
-import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
-import type {
-  AwtrixAppContainer,
-  AwtrixNotifyContainer,
-  AwtrixPayload,
-  NotifyPayloadOptions,
-} from "./types.ts";
+import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./display.ts";
+import type { AwtrixPayload, NotifyPayloadOptions } from "./payload.ts";
+import type { AwtrixAppContainer, AwtrixNotifyContainer } from "./render-tree.ts";
 
 export interface RenderSession {
   update(element: ReactNode): void;

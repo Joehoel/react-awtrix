@@ -3,13 +3,13 @@ import type {
   AppProps,
   BitmapProps,
   CircleProps,
-  Color,
   EffectSettings,
   LineProps,
   PixelProps,
   RectProps,
   TextProps,
-} from "./types.ts";
+} from "./element-props.ts";
+import type { Color } from "./display.ts";
 
 const colorSchema = type(["string", "|", ["number", "number", "number"]]);
 const overlaySchema = type("'clear' | 'snow' | 'rain' | 'drizzle' | 'storm' | 'thunder' | 'frost'");

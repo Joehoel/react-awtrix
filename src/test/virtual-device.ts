@@ -1,4 +1,4 @@
-import type { AwtrixPayload } from "../types.ts";
+import type { AwtrixPayload } from "../payload.ts";
 
 const MATRIX_WIDTH = 32;
 const MATRIX_HEIGHT = 8;

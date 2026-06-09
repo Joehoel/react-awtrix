@@ -6,22 +6,22 @@ export { notify, render } from "./renderer.ts";
 
 export type {
   AppHandle,
-  AppProps,
-  AwtrixProtocol,
-  AwtrixProtocolEventMap,
-  BitmapProps,
-  CircleProps,
-  Color,
-  DrawCommand,
-  LineProps,
   NotifyOptions,
-  PixelProps,
   RenderHandle,
   RenderOptions,
-  RectProps,
   Runtime,
   RuntimeOptions,
+} from "./api.ts";
+export type { Color, DrawCommand } from "./display.ts";
+export type {
+  AppProps,
+  BitmapProps,
+  CircleProps,
+  LineProps,
+  PixelProps,
+  RectProps,
   TextProps,
-} from "./types.ts";
+} from "./element-props.ts";
+export type { AwtrixProtocol, AwtrixProtocolEventMap } from "./protocol.ts";
 
 export type { AppComponentProps, TextComponentProps } from "./components.tsx";

@@ -7,7 +7,12 @@ import {
   validHostElementNames,
 } from "./elements.ts";
 import { serialize } from "./serialize.ts";
-import type { AwtrixContainer, AwtrixInstance, AwtrixNode, AwtrixTextInstance } from "./types.ts";
+import type {
+  AwtrixContainer,
+  AwtrixInstance,
+  AwtrixNode,
+  AwtrixTextInstance,
+} from "./render-tree.ts";
 
 // ─── Event priority constants (React internals) ───────────────────────────
 

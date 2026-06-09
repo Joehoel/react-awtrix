@@ -7,7 +7,7 @@ import type {
   PixelProps,
   RectProps,
   TextProps,
-} from "./types.ts";
+} from "./element-props.ts";
 
 export interface AppComponentProps extends AppProps {
   children?: ReactNode;

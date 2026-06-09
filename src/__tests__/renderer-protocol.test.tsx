@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { App, Text } from "../components.tsx";
 import { notify, render } from "../renderer.ts";
-import type { AwtrixPayload, AwtrixProtocol } from "../types.ts";
+import type { AwtrixPayload } from "../payload.ts";
+import type { AwtrixProtocol } from "../protocol.ts";
 
 async function waitFor(check: () => boolean, timeoutMs = 500): Promise<void> {
   const startedAt = Date.now();

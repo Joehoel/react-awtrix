@@ -12,7 +12,7 @@ import type {
   PixelInstance,
   RectInstance,
   TextInstance,
-} from "../types.ts";
+} from "../render-tree.ts";
 
 function createContainer(mode: "app"): AwtrixAppContainer;
 function createContainer(mode: "notify"): AwtrixNotifyContainer;

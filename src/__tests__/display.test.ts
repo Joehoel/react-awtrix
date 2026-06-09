@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { normalizeColor } from "../types.ts";
+import { normalizeColor } from "../display.ts";
 
-describe("types", () => {
+describe("display", () => {
   test("normalizeColor normalizes tuple and hex colors", () => {
     expect(normalizeColor("#ff00aa")).toBe("#FF00AA");
     expect(normalizeColor("red")).toBe("red");

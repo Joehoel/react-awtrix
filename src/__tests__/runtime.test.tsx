@@ -3,7 +3,8 @@ import { App, Text } from "../components.tsx";
 import { mqtt, type MqttClientLike, type MqttProtocolDependencies } from "../protocols/mqtt.ts";
 import { createRuntime } from "../runtime.ts";
 import { createVirtualAwtrixDevice, type VirtualAwtrixDevice } from "../test/virtual-device.ts";
-import type { AwtrixProtocol, Runtime } from "../types.ts";
+import type { Runtime } from "../api.ts";
+import type { AwtrixProtocol } from "../protocol.ts";
 
 const noop = (_payload: { pressed: boolean; raw: string }): void => {};
 
