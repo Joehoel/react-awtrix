@@ -44,7 +44,6 @@ dev machine ── alchemy deploy ──ssh──▶ Pi: rsync /addons + `ha add
 | `addon/src/clock.tsx`  | Example widget (clock + live temperature)          |
 | `infra/alchemy.run.ts` | Alchemy v2 stack (`Alchemy.Stack` + `localState`)  |
 | `infra/HassAddon.ts`   | Alchemy v2 custom resource (reconcile/delete/read) |
-| `infra/deploy.ts`      | Zero-dependency Bun deploy script (same logic)     |
 
 ## Development workflow
 
@@ -53,7 +52,7 @@ Three tiers, fastest first:
 1. **Local hot-reload** (`cd addon && bun run dev`) — the runtime runs on your
    machine against the real AWTRIX + HA over the LAN, with `bun --hot`. Tightest
    loop; no Pi, no Docker. Auth via `HASS_URL`/`HASS_TOKEN` (see `addon/.env`).
-2. **On-device dev build** (`cd infra && bun run deploy:script`) — rsyncs your
+2. **On-device dev build** (`cd infra && bun run deploy`) — Alchemy rsyncs your
    working tree into `/addons` and the Supervisor builds + runs it as a real
    add-on (exercises the container + `SUPERVISOR_TOKEN` path). No publish.
 3. **Permanent release** — bump `version` in `addon/config.yaml`, merge to
@@ -78,8 +77,7 @@ Then set the add-on's `awtrix_host` option (Settings → Add-ons → React AWTRI
 Configuration) to your device IP and restart it.
 
 > The Alchemy v2 path uses local state (no Cloudflare). Pin `alchemy` to exactly
-> `2.0.0-beta.52` with `effect@^4` — see `infra/README.md`. Prefer no deps?
-> `bun run deploy:script` does the same build/sync/restart via `deploy.ts`.
+> `2.0.0-beta.52` with `effect@^4` — see `infra/README.md`.
 
 ## Authoring widgets
 

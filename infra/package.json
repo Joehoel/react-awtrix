@@ -6,9 +6,7 @@
   "scripts": {
     "deploy": "alchemy deploy",
     "plan": "alchemy plan",
-    "destroy": "alchemy destroy",
-    "deploy:script": "bun run deploy.ts",
-    "destroy:script": "bun run deploy.ts --destroy"
+    "destroy": "alchemy destroy"
   },
   "dependencies": {
     "effect": "^4.0.0-beta.78"

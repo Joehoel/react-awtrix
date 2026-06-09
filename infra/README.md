@@ -8,8 +8,7 @@ never touches Cloudflare.
 ```
 infra/
 ├─ alchemy.run.ts   # the stack (Alchemy.Stack + localState)
-├─ HassAddon.ts     # custom resource + provider (reconcile/delete/read)
-└─ deploy.ts        # zero-dependency Bun script (same logic, no Alchemy)
+└─ HassAddon.ts     # custom resource + provider (reconcile/delete/read)
 ```
 
 ## Versions matter (this is what tripped me up earlier)
@@ -45,9 +44,6 @@ bun run destroy                                                   # tear down
 ```
 
 Then set the add-on's `awtrix_host` option in the HA UI and restart it.
-
-> Prefer no dependencies? `bun run deploy:script` runs `deploy.ts`, which does the
-> same build/sync/restart with zero packages — handy as a fallback.
 
 ## Trade-offs
 
