@@ -30,6 +30,7 @@ addon/main.js
 .cache/
 .eslintcache
 *.tsbuildinfo
+.turbo/
 
 # editors
 .idea/

@@ -6,29 +6,239 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+  # ─── Library checks (typecheck, lint, format, knip, test) ────────────────────
   check:
     name: Check
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - uses: oven-sh/setup-bun@v2
 
       - run: bun install --frozen-lockfile
 
-      - name: Typecheck
-        run: bun run --filter react-awtrix typecheck
+      - name: Check
+        run: bunx turbo run typecheck lint format:check knip test --affected
 
-      - name: Lint
-        run: bun run --filter react-awtrix lint
+  # ─── Semantic release (main only) ───────────────────────────────────────────
+  release:
+    name: Release
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Format
-        run: bun run --filter react-awtrix format:check
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Unused code
-        run: bun run --filter react-awtrix knip
+      - run: bun install --frozen-lockfile
 
-      - name: Test
-        run: bun run --filter react-awtrix test
+      - name: Run semantic-release
+        id: semantic
+        run: |
+          OUTPUT=$(bunx semantic-release 2>&1) || true
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "Published release"; then
+            VERSION=$(echo "$OUTPUT" | grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+')
+            echo "new_release_published=true" >> "$GITHUB_OUTPUT"
+            echo "new_release_version=$VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "new_release_published=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─── Add-on: prepare build matrix ──────────────────────────────────────────
+  addon-prepare:
+    name: Prepare add-on build
+    needs: [check, release]
+    if: |
+      always() &&
+      needs.check.result == 'success' &&
+      (needs.release.result == 'success' || needs.release.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      architectures: ${{ steps.info.outputs.architectures }}
+      build_matrix: ${{ steps.matrix.outputs.matrix }}
+      image_name: ${{ steps.normalize.outputs.image_name }}
+      registry_prefix: ${{ steps.normalize.outputs.registry_prefix }}
+      version: ${{ steps.normalize.outputs.version }}
+      name: ${{ steps.normalize.outputs.name }}
+      build: ${{ steps.decide.outputs.build }}
+      publish: ${{ steps.decide.outputs.publish }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          # After a release, main has a new commit — fetch latest
+          ref: ${{ github.ref }}
+
+      - name: Check paths changed
+        id: paths
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            addon:
+              - 'addon/**'
+              - 'packages/**'
+              - '.github/workflows/ci.yml'
+
+      - name: Skip if no addon changes (PR only)
+        id: should_run
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ steps.paths.outputs.addon }}" = "false" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get add-on information
+        if: steps.should_run.outputs.run == 'true'
+        id: info
+        uses: home-assistant/actions/helpers/info@master
+        with:
+          path: "./addon"
+
+      - name: Normalize add-on info
+        if: steps.should_run.outputs.run == 'true'
+        id: normalize
+        env:
+          INFO_IMAGE: ${{ steps.info.outputs.image }}
+          INFO_VERSION: ${{ steps.info.outputs.version }}
+          INFO_NAME: ${{ steps.info.outputs.name }}
+        run: |
+          image=${INFO_IMAGE//\"/}
+          version=${INFO_VERSION//\"/}
+          name=${INFO_NAME//\"/}
+          echo "image_name=${image##*/}" >> "$GITHUB_OUTPUT"
+          echo "registry_prefix=${image%/*}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare build matrix
+        if: steps.should_run.outputs.run == 'true'
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.03.2
+        with:
+          architectures: ${{ steps.info.outputs.architectures }}
+          image-name: ${{ steps.normalize.outputs.image_name }}
+          registry-prefix: ${{ steps.normalize.outputs.registry_prefix }}
+
+      - name: Log in to GHCR
+        if: steps.should_run.outputs.run == 'true' && github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Decide whether to build/publish
+        id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          IMAGE: ${{ steps.normalize.outputs.registry_prefix }}/${{ steps.normalize.outputs.image_name }}
+          VERSION: ${{ steps.normalize.outputs.version }}
+          SHOULD_RUN: ${{ steps.should_run.outputs.run }}
+        run: |
+          if [ "$SHOULD_RUN" = "false" ]; then
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$EVENT" = "pull_request" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if docker manifest inspect "${IMAGE}:${VERSION}" > /dev/null 2>&1; then
+            echo "::notice::${IMAGE}:${VERSION} already published — skipping build/publish."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ─── Add-on: build per-arch images ─────────────────────────────────────────
+  addon-build:
+    name: Build ${{ matrix.arch }} image
+    needs: addon-prepare
+    if: needs.addon-prepare.outputs.build == 'true'
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.addon-prepare.outputs.build_matrix) }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Bundle the add-on
+        run: |
+          bun install --frozen-lockfile
+          bunx turbo run build --filter=react-awtrix-addon
+          cp addon/staging/main.js addon/main.js
+
+      - name: Build image
+        uses: home-assistant/builder/actions/build-image@2026.03.2
+        with:
+          arch: ${{ matrix.arch }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          context: "./addon"
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ needs.addon-prepare.outputs.version }}
+            latest
+          labels: |
+            io.hass.type=addon
+            io.hass.name=${{ needs.addon-prepare.outputs.name }}
+          push: ${{ needs.addon-prepare.outputs.publish == 'true' }}
+          version: ${{ needs.addon-prepare.outputs.version }}
+
+  # ─── Add-on: publish multi-arch manifest ────────────────────────────────────
+  addon-manifest:
+    name: Publish multi-arch manifest
+    needs: [addon-prepare, addon-build]
+    if: needs.addon-prepare.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+    steps:
+      - name: Publish multi-arch manifest
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.03.2
+        with:
+          architectures: ${{ needs.addon-prepare.outputs.architectures }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: ${{ needs.addon-prepare.outputs.image_name }}
+          image-tags: |
+            ${{ needs.addon-prepare.outputs.version }}
+            latest
+          registry-prefix: ${{ needs.addon-prepare.outputs.registry_prefix }}

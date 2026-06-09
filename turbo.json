@@ -1,0 +1,32 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "staging/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["transit"]
+    },
+    "lint": {},
+    "format:check": {},
+    "knip": {},
+    "test": {
+      "dependsOn": ["transit"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "deploy": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "prepush": {
+      "cache": false
+    }
+  }
+}
