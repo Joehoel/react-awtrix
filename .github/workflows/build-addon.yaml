@@ -127,10 +127,8 @@ jobs:
       - name: Bundle the add-on
         run: |
           bun install --frozen-lockfile
-          cd addon
-          bun install --frozen-lockfile
-          bun run build
-          cp staging/main.js main.js
+          bun run --filter react-awtrix-addon build
+          cp addon/staging/main.js addon/main.js
 
       - name: Build image
         uses: home-assistant/builder/actions/build-image@2026.03.2

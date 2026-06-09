@@ -8,8 +8,8 @@
     "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
-      "react-awtrix": ["../src/index.ts"]
+      "react-awtrix": ["../packages/react-awtrix/src/index.ts"]
     }
   },
-  "include": ["src", "build.ts", "../src/jsx.d.ts"]
+  "include": ["src", "build.ts", "../packages/react-awtrix/src/jsx.d.ts"]
 }

@@ -14,5 +14,5 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "exclude": ["dist", "addon", "infra"]
+  "exclude": ["dist"]
 }
