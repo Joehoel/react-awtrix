@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { resolveProtocol } from "./protocols/resolve.ts";
 import { createReconcilerRoot, reconciler } from "./reconciler.ts";
+import { createAppRenderSession } from "./render-session.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import type {
-  AwtrixAppContainer,
   AwtrixNotifyContainer,
   NotifyOptions,
   NotifyPayloadOptions,
@@ -58,15 +58,13 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
   const appName = options.app;
   const enqueueOperation = createOperationQueue();
   let disposed = false;
-  let deletePromise: Promise<void> | undefined;
 
-  const container: AwtrixAppContainer = {
+  const session = createAppRenderSession({
     appName,
-    mode: "app",
-    matrixWidth: options.width ?? DEFAULT_MATRIX_WIDTH,
-    matrixHeight: options.height ?? DEFAULT_MATRIX_HEIGHT,
-    children: [],
-    debug: options.debug ?? false,
+    identifierPrefix: "awtrix",
+    width: options.width,
+    height: options.height,
+    debug: options.debug,
     debounceMs: options.debounce ?? 50,
     requestFlush: async (payload) => {
       if (disposed) {
@@ -82,36 +80,19 @@ export function render(element: ReactNode, options: RenderOptions): RenderHandle
       });
     },
     requestDelete: () => {
-      if (deletePromise !== undefined) {
-        return deletePromise;
-      }
-
       disposed = true;
-      deletePromise = enqueueOperation(async () => {
+      return enqueueOperation(async () => {
         await protocol.deleteApp(appName);
       });
-
-      return deletePromise;
     },
-  };
+  });
 
-  const root = createReconcilerRoot(container, "awtrix");
-
-  reconciler.updateContainer(element, root, null, null);
+  session.update(element);
 
   return {
     async unmount() {
-      reconciler.updateContainer(null, root, null, null);
-
-      // Clear pending flush
-      if (container.pendingFlush !== undefined) {
-        clearTimeout(container.pendingFlush);
-        container.pendingFlush = undefined;
-      }
-
-      // Delete the app from the device
       try {
-        await container.requestDelete();
+        await session.unmount();
       } catch (err) {
         console.error("[react-awtrix] Failed to delete app on unmount:", err);
       }

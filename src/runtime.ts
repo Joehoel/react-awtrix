@@ -1,25 +1,21 @@
 import type { ReactNode } from "react";
 import { resolveProtocol } from "./protocols/resolve.ts";
-import { createReconcilerRoot, reconciler } from "./reconciler.ts";
+import { createAppRenderSession, type AppRenderSession } from "./render-session.ts";
 import { DEFAULT_MATRIX_HEIGHT, DEFAULT_MATRIX_WIDTH } from "./types.ts";
 import { DeviceTransport } from "./transport.ts";
 import type {
   AppHandle,
-  AwtrixAppContainer,
-  AwtrixContainer,
   AwtrixProtocol,
   AwtrixProtocolEventMap,
   Runtime,
   RuntimeOptions,
 } from "./types.ts";
 
-type RuntimeRoot = ReturnType<typeof reconciler.createContainer>;
 const moduleRuntimeOwner = Symbol("react-awtrix-runtime-owner");
 
 interface RuntimeAppEntry {
   name: string;
-  root: RuntimeRoot;
-  container: AwtrixAppContainer;
+  session: AppRenderSession;
   generation: number;
 }
 
@@ -177,22 +173,19 @@ class AwtrixRuntimeImpl implements Runtime {
 
     const existingEntry = this.entries.get(name);
     if (existingEntry === undefined) {
-      const container = this.createContainer(name);
-      const root = this.createRoot(name, container);
       const nextEntry: RuntimeAppEntry = {
         name,
-        root,
-        container,
+        session: this.createSession(name),
         generation: 1,
       };
 
       this.entries.set(name, nextEntry);
-      reconciler.updateContainer(element, root, null, null);
+      nextEntry.session.update(element);
       return this.createHandle(name, nextEntry.generation);
     }
 
     existingEntry.generation += 1;
-    reconciler.updateContainer(element, existingEntry.root, null, null);
+    existingEntry.session.update(element);
     return this.createHandle(name, existingEntry.generation);
   }
 
@@ -267,12 +260,7 @@ class AwtrixRuntimeImpl implements Runtime {
     this.entries.clear();
 
     for (const entry of entriesToUnmount) {
-      reconciler.updateContainer(null, entry.root, null, null);
-
-      if (entry.container.pendingFlush !== undefined) {
-        clearTimeout(entry.container.pendingFlush);
-        entry.container.pendingFlush = undefined;
-      }
+      void entry.session.unmount({ deleteOnDevice: false });
     }
 
     this.clearProtocolSubscriptions();
@@ -369,15 +357,15 @@ class AwtrixRuntimeImpl implements Runtime {
     this.signalsRegistered = true;
   }
 
-  private createContainer(name: string): AwtrixAppContainer {
-    return {
+  private createSession(name: string): AppRenderSession {
+    return createAppRenderSession({
       appName: name,
-      mode: "app",
-      matrixWidth: this.matrixWidth,
-      matrixHeight: this.matrixHeight,
-      children: [],
+      identifierPrefix: `awtrix-runtime-${name}`,
+      width: this.matrixWidth,
+      height: this.matrixHeight,
       debug: this.debug,
       debounceMs: this.debounceMs,
+      onError: (error) => this.reportError(name, error),
       requestFlush: async (payload) => {
         if (this.disposed || !this.entries.has(name)) {
           return;
@@ -388,13 +376,7 @@ class AwtrixRuntimeImpl implements Runtime {
       requestDelete: async () => {
         await this.transport.enqueueDelete(name);
       },
-    };
-  }
-
-  private createRoot(name: string, container: AwtrixContainer): RuntimeRoot {
-    return createReconcilerRoot(container, `awtrix-runtime-${name}`, (error) =>
-      this.reportError(name, error),
-    );
+    });
   }
 
   private createHandle(name: string, generation: number): AppHandle {
@@ -409,7 +391,7 @@ class AwtrixRuntimeImpl implements Runtime {
           return;
         }
 
-        reconciler.updateContainer(element, entry.root, null, null);
+        entry.session.update(element);
       },
 
       unmount: async () => {
@@ -428,16 +410,7 @@ class AwtrixRuntimeImpl implements Runtime {
   }
 
   private async teardownEntry(entry: RuntimeAppEntry, deleteOnDevice: boolean): Promise<void> {
-    reconciler.updateContainer(null, entry.root, null, null);
-
-    if (entry.container.pendingFlush !== undefined) {
-      clearTimeout(entry.container.pendingFlush);
-      entry.container.pendingFlush = undefined;
-    }
-
-    if (deleteOnDevice) {
-      await entry.container.requestDelete();
-    }
+    await entry.session.unmount({ deleteOnDevice });
   }
 
   private unregisterSignals(): void {
