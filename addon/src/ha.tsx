@@ -28,7 +28,7 @@ function emit(): void {
   }
 }
 
-function resolveAuth(): Auth {
+function resolveAuth(): Auth | null {
   // As an add-on (homeassistant_api: true), the Supervisor injects
   // SUPERVISOR_TOKEN and proxies Core internally — no token to manage.
   const supervisorToken = process.env.SUPERVISOR_TOKEN;
@@ -49,16 +49,19 @@ function resolveAuth(): Auth {
     return createLongLivedTokenAuth(url, token);
   }
 
-  throw new Error(
-    "No Home Assistant credentials. As an add-on, set `homeassistant_api: true` " +
-      "(SUPERVISOR_TOKEN is injected). For local dev, set HASS_URL and HASS_TOKEN.",
-  );
+  return null;
 }
 
 async function connect(): Promise<void> {
+  const auth = resolveAuth();
+  if (auth === null) {
+    console.log("[ha] No Home Assistant credentials configured — skipping HA connection.");
+    return;
+  }
+
   for (let attempt = 1; ; attempt++) {
     try {
-      connection = await createConnection({ auth: resolveAuth() });
+      connection = await createConnection({ auth });
       resolveConnectionPromise(connection);
       subscribeEntities(connection, (next) => {
         entities = next;

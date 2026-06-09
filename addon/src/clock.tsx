@@ -18,7 +18,7 @@ export function WeatherClock() {
     return () => clearInterval(timer);
   }, []);
 
-  const weather = useEntity("weather.home");
+  const weather = useEntity("weather.forecast_home");
   const temperature = weather?.attributes?.temperature as number | undefined;
 
   return (

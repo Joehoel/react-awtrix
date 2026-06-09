@@ -199,6 +199,15 @@ function getDirectMqttConfig(options: AddonOptions): MqttBrokerConfig | null {
 }
 
 export async function resolveProtocol(): Promise<AwtrixProtocol> {
+  // 0. Direct MQTT env vars — fastest path for local dev.
+  //    Set AWTRIX_MQTT_BROKER + AWTRIX_MQTT_PREFIX to skip all HA/Supervisor logic.
+  const envBroker = process.env.AWTRIX_MQTT_BROKER;
+  const envPrefix = process.env.AWTRIX_MQTT_PREFIX;
+  if (envBroker !== undefined && envPrefix !== undefined) {
+    console.log(`[discover] Using env MQTT: broker=${envBroker}, prefix=${envPrefix}`);
+    return mqtt({ broker: envBroker, prefix: envPrefix });
+  }
+
   const options = readOptions();
   const explicitPrefix = options.awtrix_mqtt_prefix || undefined;
   const explicitHost = options.awtrix_host || undefined;
