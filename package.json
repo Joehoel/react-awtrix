@@ -15,5 +15,12 @@
     "format:check": "bun run --filter react-awtrix format:check",
     "knip": "bun run --filter react-awtrix knip",
     "prepush": "bun run --filter react-awtrix prepush"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/exec": "^7.0.0",
+    "@semantic-release/git": "^10.0.0",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "semantic-release": "^24.0.0"
   }
 }
