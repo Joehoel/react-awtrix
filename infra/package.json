@@ -9,7 +9,7 @@
     "destroy": "alchemy destroy"
   },
   "dependencies": {
-    "effect": "^4.0.0-beta.78"
+    "effect": "^4.0.0-beta.83"
   },
   "devDependencies": {
     "@types/bun": "latest",
