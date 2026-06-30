@@ -72,8 +72,8 @@
     "example:server": "bun --hot examples/server.tsx"
   },
   "dependencies": {
-    "aedes": "^1.0.2",
-    "arktype": "^2.2.0",
+    "aedes": "^1.1.1",
+    "arktype": "^2.2.1",
     "mqtt": "^5.15.1",
     "react": "^19.2.7",
     "react-reconciler": "^0.33.0"
