@@ -24,6 +24,8 @@ report.*.json
 # add-on build output + alchemy state
 addon/staging/
 addon/main.js
+addon/public/
+addon/.react-awtrix/
 .alchemy/
 
 # caches

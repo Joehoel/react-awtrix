@@ -21,17 +21,22 @@ export function WeatherClock() {
   const weather = useEntity("weather.forecast_home");
   const temperature = weather?.attributes?.temperature as number | undefined;
 
+  const latestCommit = useEntity("sensor.joehoel_react_awtrix_latest_commit");
+
+  console.log({ latestCommit });
+
   return (
     <App icon="66" duration={10} background="#000814">
       <Rect x={0} y={0} width={32} height={8} color="#000814" filled />
       <Text x={1} y={1} color="#7FDBFF">
-        {hhmm(now)}
+        {latestCommit?.state}
+        {/* {hhmm(now)} */}
       </Text>
-      {temperature !== undefined && (
+      {/* {temperature !== undefined && (
         <Text x={21} y={1} color="#FFD166">
           {Math.round(temperature)}
         </Text>
-      )}
+      )} */}
     </App>
   );
 }
