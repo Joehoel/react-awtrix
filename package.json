@@ -23,7 +23,7 @@
     "@semantic-release/exec": "^7.0.0",
     "@semantic-release/git": "^10.0.0",
     "conventional-changelog-conventionalcommits": "^9.3.1",
-    "semantic-release": "^25.0.5",
-    "turbo": "^2.9.18"
+    "semantic-release": "^25.0.7",
+    "turbo": "^2.10.5"
   }
 }
