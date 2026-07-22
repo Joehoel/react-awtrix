@@ -88,7 +88,7 @@
     "knip": "^6.26.0",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
-    "oxlint-tsgolint": "^0.24.0",
+    "oxlint-tsgolint": "^7.0.2001",
     "publint": "^0.3.21",
     "tsdown": "^0.22.7"
   },
