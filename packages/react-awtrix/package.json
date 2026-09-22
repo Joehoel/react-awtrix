@@ -72,17 +72,17 @@
     "example:server": "bun --hot examples/server.tsx"
   },
   "dependencies": {
-    "aedes": "^1.1.1",
+    "aedes": "^1.2.0",
     "arktype": "^2.2.3",
-    "mqtt": "^5.15.2",
-    "react": "^19.2.8",
-    "react-reconciler": "^0.33.0"
+    "mqtt": "^5.16.0",
+    "react": "^19.3.0",
+    "react-reconciler": "^0.34.0"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.5",
     "@total-typescript/tsconfig": "^1.0.4",
     "@types/bun": "latest",
-    "@types/react": "^19.2.17",
+    "@types/react": "^19.3.0",
     "@types/react-reconciler": "^0.33.0",
     "@typescript/native-preview": "latest",
     "knip": "^6.26.0",
